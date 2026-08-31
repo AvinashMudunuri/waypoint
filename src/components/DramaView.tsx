@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { DramaPhrase } from '../types'
+import { SpeakButton } from './SpeakButton'
 import { exportPhrasesToAnki, exportPhrasesToCsv } from '../utils/ankiExport'
+import { isSpeechAvailable, warmSpeechVoices } from '../utils/speech'
 
 interface DramaViewProps {
   phrases: DramaPhrase[]
@@ -15,6 +17,11 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
   const [notes, setNotes] = useState('')
   const [expanded, setExpanded] = useState(false)
   const [exportMsg, setExportMsg] = useState('')
+  const canSpeak = isSpeechAvailable()
+
+  useEffect(() => {
+    warmSpeechVoices()
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -137,7 +144,16 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
               className="bg-white rounded-2xl border border-cream-dark p-4 flex items-start justify-between gap-3"
             >
               <div>
-                <p className="text-lg font-semibold text-ink">{phrase.korean}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-lg font-semibold text-ink">{phrase.korean}</p>
+                  {canSpeak && (
+                    <SpeakButton
+                      text={phrase.korean}
+                      label={`Pronounce ${phrase.korean}`}
+                      className="w-8 h-8"
+                    />
+                  )}
+                </div>
                 <p className="text-sm text-ink-muted">{phrase.english}</p>
                 <p className="text-xs text-ink-muted mt-1">
                   {phrase.show}

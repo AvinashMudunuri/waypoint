@@ -28,10 +28,11 @@ npm install
 npm run dev      # Vite → http://localhost:5173
 npm run build    # tsc -b && vite build
 npm run lint     # oxlint
+npm run test     # node:test on spokenHangul mapping
 npm run preview  # serve dist
 ```
 
-There is **no test script** and no `*.test.*` / `*.spec.*` files. Do not claim tests pass. If you add tests, add a `package.json` script and document it here.
+`npm run test` covers `spokenHangul` only (`src/data/hangul.test.ts`). There is no component test suite. Do not claim UI or TTS quality from that script.
 
 ## Layout (as built)
 
@@ -48,6 +49,7 @@ src/
   components/             # one view per tab + Layout, InstallPrompt, ProgressRing
   utils/
     ankiExport.ts         # .txt (Anki) + CSV download from drama phrases
+    speech.ts             # Web Speech API, lang ko-KR
 ```
 
 Tabs (`types.ts` `Tab`): `home` | `phases` | `hangul` | `routine` | `drama` | `milestones` (UI label: Goals).
@@ -76,6 +78,7 @@ Korean copy and Hangul UI are hardcoded (e.g. `Layout` subtitle “Korean · Hon
 - New surface: add a `Tab`, a view under `components/`, and a nav entry in `Layout.tsx`.
 - Styling: Tailwind v4 via `@tailwindcss/vite`. Tokens live in `src/index.css`.
 - PWA: `vite.config.ts` (`vite-plugin-pwa`), icons in `public/`.
+- Pronunciation: `spokenHangul()` maps jamo to a syllable, then `speakKorean()` uses the device voice (`ko-KR`). Isolated ㅏ/ㄱ will not speak correctly if you skip the mapping. Quality depends on the OS voice — this is not recorded audio.
 - Do not add accounts, sync, or a server unless that roadmap item is the task.
 
 ## Verification

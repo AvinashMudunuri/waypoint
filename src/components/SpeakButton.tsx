@@ -1,0 +1,25 @@
+import { speakKorean } from '../utils/speech'
+
+interface SpeakButtonProps {
+  text: string
+  label?: string
+  className?: string
+}
+
+export function SpeakButton({ text, label, className = '' }: SpeakButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        speakKorean(text)
+      }}
+      className={`inline-flex items-center justify-center rounded-full text-coral hover:bg-coral/10 transition-colors ${className}`}
+      aria-label={label ?? `Pronounce ${text}`}
+    >
+      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden>
+        <path d="M4 9v6h4l5 4V5L8 9H4zm11.5 3c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.74 2.5-2.26 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+      </svg>
+    </button>
+  )
+}
