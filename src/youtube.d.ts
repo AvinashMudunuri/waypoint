@@ -16,6 +16,8 @@ declare global {
       getPlaylistIndex(): number
       getVideoData(): { video_id?: string; title?: string }
       seekTo(seconds: number, allowSeekAhead: boolean): void
+      cuePlaylist(opts: { list: string; listType?: string; index?: number }): void
+      cueVideoById(videoId: string, startSeconds?: number): void
     }
 
     interface PlayerOptions {

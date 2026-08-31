@@ -71,18 +71,18 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
         playsinline: 1,
         origin: window.location.origin,
       }
-      if (item.kind === 'playlist') {
-        playerVars.listType = 'playlist'
-        playerVars.list = item.youtubeId
-      }
 
-      playerRef.current = new window.YT!.Player(mount, {
+      const options: YT.PlayerOptions = {
         width: '100%',
         height: '100%',
-        videoId: item.kind === 'video' ? item.youtubeId : undefined,
         playerVars,
         events: {
           onReady: (e) => {
+            if (item.kind === 'playlist') {
+              e.target.cuePlaylist({ list: item.youtubeId, listType: 'playlist' })
+            } else {
+              e.target.cueVideoById(item.youtubeId)
+            }
             rememberList(e.target)
             const data = e.target.getVideoData()
             const saved = data.video_id ? progressRef.current[data.video_id] : undefined
@@ -108,7 +108,9 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
             }
           },
         },
-      })
+      }
+
+      playerRef.current = new window.YT!.Player(mount, options)
     }
 
     void mount()
