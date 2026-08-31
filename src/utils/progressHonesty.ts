@@ -44,6 +44,11 @@ export function phaseTasksComplete(phase: Phase, completedTasks: Record<string, 
   return phase.tasks.length > 0 && phase.tasks.every((t) => completedTasks[t.id])
 }
 
+export function currentPhaseFromTasks(completedTasks: Record<string, boolean>): string {
+  const first = phases.find((p) => !phaseTasksComplete(p, completedTasks))
+  return first?.id ?? phases[phases.length - 1].id
+}
+
 export function firstIncompleteTask(
   completedTasks: Record<string, boolean>,
 ): { phase: Phase; taskId: string; label: string } | null {

@@ -21,8 +21,7 @@ export function MilestonesView({
       <div>
         <h2 className="font-display text-2xl font-bold">Realistic Milestones</h2>
         <p className="text-sm text-ink-muted mt-1">
-          Dots move when the app has evidence (quiz, finished phase tasks). Timelines are estimates,
-          not a clock that promotes you.
+          From logged work. Fluency is never auto-checked.
         </p>
       </div>
 

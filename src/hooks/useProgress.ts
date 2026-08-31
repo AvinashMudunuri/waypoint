@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { AppProgress, DramaPhrase, VideoWatch, Watchable } from '../types'
 import { catalog } from '../data/videos'
 import { phases } from '../data/curriculum'
-import { appendHangulRecent } from '../utils/progressHonesty'
+import { appendHangulRecent, currentPhaseFromTasks } from '../utils/progressHonesty'
 import { isWatchComplete, playlistWatchSummary } from '../utils/youtube'
 
 const STORAGE_KEY = 'waypoint-progress'
@@ -40,6 +40,7 @@ function loadProgress(): AppProgress {
         videoProgress: parsed.videoProgress ?? {},
         playlistVideos: parsed.playlistVideos ?? {},
         customWatch: parsed.customWatch ?? [],
+        currentPhaseId: currentPhaseFromTasks(parsed.completedTasks ?? {}),
       }
     }
   } catch {
@@ -64,7 +65,7 @@ export function useProgress() {
       const completed = { ...prev.completedTasks, [taskId]: !prev.completedTasks[taskId] }
       const updated = { ...prev, completedTasks: completed }
 
-      maybeAdvancePhase(updated, completed, prev.currentPhaseId)
+      updated.currentPhaseId = currentPhaseFromTasks(completed)
 
       return updated
     })
@@ -202,22 +203,6 @@ export function useProgress() {
   }
 }
 
-function maybeAdvancePhase(
-  updated: AppProgress,
-  completed: Record<string, boolean>,
-  currentPhaseId: string,
-) {
-  for (const phase of phases) {
-    const allDone = phase.tasks.every((t) => completed[t.id])
-    if (allDone && phase.id === currentPhaseId) {
-      const nextIndex = phases.findIndex((p) => p.id === phase.id) + 1
-      if (nextIndex < phases.length) {
-        updated.currentPhaseId = phases[nextIndex].id
-      }
-    }
-  }
-}
-
 function completeLinkedWatchTasks(updated: AppProgress) {
   for (const item of catalog) {
     if (!item.taskId || item.kind !== 'playlist') continue
@@ -227,6 +212,6 @@ function completeLinkedWatchTasks(updated: AppProgress) {
     if (summary.percent < 100) continue
     if (updated.completedTasks[item.taskId]) continue
     updated.completedTasks = { ...updated.completedTasks, [item.taskId]: true }
-    maybeAdvancePhase(updated, updated.completedTasks, updated.currentPhaseId)
+    updated.currentPhaseId = currentPhaseFromTasks(updated.completedTasks)
   }
 }

@@ -4,17 +4,26 @@ interface SpeakButtonProps {
   text: string
   label?: string
   className?: string
+  playing?: boolean
+  onPlaying?: (playing: boolean) => void
 }
 
-export function SpeakButton({ text, label, className = '' }: SpeakButtonProps) {
+export function SpeakButton({ text, label, className = '', playing = false, onPlaying }: SpeakButtonProps) {
   return (
     <button
       type="button"
       onClick={(e) => {
         e.stopPropagation()
-        speakKorean(text)
+        onPlaying?.(true)
+        speakKorean(text, {
+          onStart: () => onPlaying?.(true),
+          onEnd: () => onPlaying?.(false),
+        })
       }}
-      className={`inline-flex items-center justify-center rounded-full text-coral hover:bg-coral/10 transition-colors ${className}`}
+      aria-pressed={playing}
+      className={`inline-flex items-center justify-center rounded-full text-coral hover:bg-coral/10 transition-colors ${
+        playing ? 'bg-coral/15 ring-2 ring-coral/40' : ''
+      } ${className}`}
       aria-label={label ?? `Pronounce ${text}`}
     >
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden>

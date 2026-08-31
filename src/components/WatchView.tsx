@@ -54,23 +54,18 @@ export function WatchView({
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold">Watch</h2>
-        <p className="text-sm text-ink-muted mt-1">
-          Play study videos here so we can record how far you got. Licensed K-dramas stay on Viki
-          or your usual app — we cannot embed those.
-        </p>
-      </div>
-
+    <div className="space-y-4">
       {active && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <YoutubePlayer
             item={active}
             videoProgress={videoProgress}
             onProgress={onProgress}
             onPlaylistIds={onPlaylistIds}
           />
+          <p className="text-xs text-ink-muted px-1">
+            80% watched = done. Resume is saved. Viki/Netflix stay in their own apps.
+          </p>
           <WatchStatus item={active} videoProgress={videoProgress} playlistVideos={playlistVideos} />
         </div>
       )}
@@ -100,23 +95,27 @@ export function WatchView({
         })}
       </div>
 
-      <form onSubmit={handlePaste} className="bg-white rounded-2xl border border-cream-dark p-4 space-y-3">
-        <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Add YouTube URL</p>
-        <input
-          type="url"
-          value={paste}
-          onChange={(e) => setPaste(e.target.value)}
-          placeholder="https://www.youtube.com/watch?v=…"
-          className="w-full px-4 py-3 bg-cream rounded-xl text-sm border-0 focus:ring-2 focus:ring-coral/30 outline-none"
-        />
-        {pasteError && <p className="text-xs text-coral">{pasteError}</p>}
-        <button
-          type="submit"
-          className="w-full py-2.5 bg-ink text-white rounded-xl text-sm font-semibold hover:bg-ink/90"
-        >
-          Track this video
-        </button>
-      </form>
+      <details className="bg-white rounded-2xl border border-cream-dark p-3">
+        <summary className="text-xs font-semibold text-ink-muted uppercase tracking-wider cursor-pointer">
+          Add a YouTube URL
+        </summary>
+        <form onSubmit={handlePaste} className="mt-3 space-y-3">
+          <input
+            type="url"
+            value={paste}
+            onChange={(e) => setPaste(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=…"
+            className="w-full px-4 py-3 bg-cream rounded-xl text-sm border-0 focus:ring-2 focus:ring-coral/30 outline-none"
+          />
+          {pasteError && <p className="text-xs text-coral">{pasteError}</p>}
+          <button
+            type="submit"
+            className="w-full py-2.5 bg-ink text-white rounded-xl text-sm font-semibold hover:bg-ink/90"
+          >
+            Track this video
+          </button>
+        </form>
+      </details>
     </div>
   )
 }
@@ -159,8 +158,7 @@ function WatchStatus({
       <p className="text-sm text-ink-muted mt-1">{summary.label}</p>
       {item.taskId === 'h1' && (
         <p className="text-xs text-ink-muted mt-2">
-          Finish every video in this playlist (80%+) and Phase 1 task “Watch GO! Billy Korean Hangul
-          playlist” checks off automatically.
+          All videos at 80%+ auto-checks the Hangul playlist task.
         </p>
       )}
     </div>

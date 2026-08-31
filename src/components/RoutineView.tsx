@@ -14,9 +14,7 @@ export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrase
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold">Weekly Routine</h2>
-        <p className="text-sm text-ink-muted mt-1">
-          ~3–4 hours of structured study per week, plus your normal drama time.
-        </p>
+        <p className="text-sm text-ink-muted mt-1">Sunday 20–30 min. Log after you do it.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-cream-dark p-5">
@@ -87,10 +85,9 @@ export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrase
       )}
 
       <div className="bg-coral/5 rounded-2xl p-5 border border-coral/10">
-        <h3 className="font-display font-semibold text-coral mb-2">The rule</h3>
+        <h3 className="font-display font-semibold text-coral mb-2">Speaking</h3>
         <p className="text-sm text-ink-muted">
-          Start speaking by week 3–4, not "when you're ready." Input from dramas and TTMIK
-          builds recognition; tutor sessions convert it into real conversation.
+          Start in weeks 3–4. Input builds recognition; tutor time turns it into speech.
         </p>
       </div>
     </div>

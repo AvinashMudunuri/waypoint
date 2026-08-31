@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { milestones, phases } from './data/curriculum'
 import { InstallPrompt } from './components/InstallPrompt'
 import { HomeView } from './components/HomeView'
@@ -16,15 +16,33 @@ import {
   type LogMode,
   type PathMode,
 } from './utils/progressHonesty'
+import { defaultRoute, parseHash, routesEqual, toHash, type RouteState } from './utils/hashRoute'
 import type { Tab } from './types'
 
+function routeFromLocation(): RouteState {
+  return parseHash(window.location.hash)
+}
+
 export default function App() {
-  const [tab, setTab] = useState<Tab>('today')
-  const [learnMode, setLearnMode] = useState<LearnMode>('practice')
-  const [startQuiz, setStartQuiz] = useState(false)
-  const [logMode, setLogMode] = useState<LogMode>('routine')
-  const [pathMode, setPathMode] = useState<PathMode>('phases')
+  const [route, setRoute] = useState<RouteState>(routeFromLocation)
   const [watchFocusId, setWatchFocusId] = useState<string | null>(null)
+
+  const applyRoute = useCallback((next: RouteState) => {
+    setRoute((prev) => (routesEqual(prev, next) ? prev : next))
+  }, [])
+
+  useEffect(() => {
+    const onHash = () => applyRoute(routeFromLocation())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [applyRoute])
+
+  useEffect(() => {
+    const hash = toHash(route)
+    if (window.location.hash !== hash) {
+      window.history.replaceState(null, '', hash)
+    }
+  }, [route])
 
   const {
     progress,
@@ -59,13 +77,18 @@ export default function App() {
     hangulReady: hangul.ready,
   })
 
-  const go = (nextTab: Tab, opts?: { learn?: LearnMode; quiz?: boolean; log?: LogMode; path?: PathMode; watchId?: string }) => {
-    if (opts?.learn) setLearnMode(opts.learn)
-    if (opts?.quiz !== undefined) setStartQuiz(opts.quiz)
-    if (opts?.log) setLogMode(opts.log)
-    if (opts?.path) setPathMode(opts.path)
+  const go = (
+    nextTab: Tab,
+    opts?: { learn?: LearnMode; quiz?: boolean; log?: LogMode; path?: PathMode; watchId?: string },
+  ) => {
+    applyRoute({
+      tab: nextTab,
+      learnMode: opts?.learn ?? 'practice',
+      quiz: opts?.quiz ?? false,
+      logMode: opts?.log ?? 'routine',
+      pathMode: opts?.path ?? 'phases',
+    })
     if (opts?.watchId) setWatchFocusId(opts.watchId)
-    setTab(nextTab)
   }
 
   const doNext = () => {
@@ -78,8 +101,12 @@ export default function App() {
     })
   }
 
+  const onTabChange = (tab: Tab) => {
+    applyRoute({ ...defaultRoute(), tab })
+  }
+
   const renderView = () => {
-    switch (tab) {
+    switch (route.tab) {
       case 'today':
         return (
           <HomeView
@@ -101,12 +128,9 @@ export default function App() {
       case 'learn':
         return (
           <LearnView
-            mode={learnMode}
-            onMode={(m) => {
-              setLearnMode(m)
-              if (m === 'practice') setStartQuiz(false)
-            }}
-            startQuiz={startQuiz}
+            mode={route.learnMode}
+            onMode={(m) => applyRoute({ ...route, learnMode: m, quiz: false })}
+            startQuiz={route.quiz}
             hangulStats={progress.hangulStats}
             onHangulAnswer={recordHangulAnswer}
             videoProgress={progress.videoProgress}
@@ -121,8 +145,8 @@ export default function App() {
       case 'log':
         return (
           <LogView
-            mode={logMode}
-            onMode={setLogMode}
+            mode={route.logMode}
+            onMode={(m) => applyRoute({ ...route, logMode: m })}
             routineChecks={progress.routineChecks}
             onToggleRoutine={toggleRoutine}
             onResetWeek={resetWeek}
@@ -134,8 +158,8 @@ export default function App() {
       case 'path':
         return (
           <PathView
-            mode={pathMode}
-            onMode={setPathMode}
+            mode={route.pathMode}
+            onMode={(m) => applyRoute({ ...route, pathMode: m })}
             phases={phases}
             currentPhaseId={progress.currentPhaseId}
             completedTasks={progress.completedTasks}
@@ -153,7 +177,7 @@ export default function App() {
   }
 
   return (
-    <Layout activeTab={tab} onTabChange={setTab}>
+    <Layout activeTab={route.tab} onTabChange={onTabChange}>
       <InstallPrompt />
       {renderView()}
     </Layout>

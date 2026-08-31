@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { phases } from '../data/curriculum.ts'
 import {
   appendHangulRecent,
+  currentPhaseFromTasks,
   decideNextAction,
   hangulRecentStats,
   HANGUL_READY_SAMPLE,
@@ -24,6 +25,13 @@ test('appendHangulRecent keeps a window of 20', () => {
   let recent: boolean[] = []
   for (let i = 0; i < 25; i++) recent = appendHangulRecent(recent, i % 2 === 0)
   assert.equal(recent.length, 20)
+})
+
+test('current phase retreats to the first incomplete phase', () => {
+  const hangulDone = Object.fromEntries(phases[0].tasks.map((t) => [t.id, true]))
+  assert.equal(currentPhaseFromTasks(hangulDone), 'foundation')
+  const almost = { ...hangulDone, h1: false }
+  assert.equal(currentPhaseFromTasks(almost), 'hangul')
 })
 
 test('phase complete is all checkboxes, not phase id', () => {

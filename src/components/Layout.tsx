@@ -7,11 +7,64 @@ interface LayoutProps {
   onTabChange: (tab: Tab) => void
 }
 
-const tabs: { id: Tab; label: string; icon: string }[] = [
-  { id: 'today', label: 'Today', icon: '⌂' },
-  { id: 'learn', label: 'Learn', icon: '가' },
-  { id: 'log', label: 'Log', icon: '☰' },
-  { id: 'path', label: 'Path', icon: '◈' },
+function IconToday() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function IconLearn() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4 19V7.5A1.5 1.5 0 0 1 5.5 6H12v13H5.5A1.5 1.5 0 0 1 4 17.5V19Zm8-13h6.5A1.5 1.5 0 0 1 20 7.5V19h-8V6Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function IconLog() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M7 7h10M7 12h10M7 17h6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function IconPath() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M12 5v2.5M12 16.5V19M5 12h2.5M16.5 12H19"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+const tabs: { id: Tab; label: string; icon: typeof IconToday }[] = [
+  { id: 'today', label: 'Today', icon: IconToday },
+  { id: 'learn', label: 'Learn', icon: IconLearn },
+  { id: 'log', label: 'Log', icon: IconLog },
+  { id: 'path', label: 'Path', icon: IconPath },
 ]
 
 export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
@@ -46,7 +99,7 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
                   current ? 'text-coral font-semibold' : 'text-ink-muted hover:text-ink'
                 }`}
               >
-                <span className="text-lg leading-none" aria-hidden>{tab.icon}</span>
+                <tab.icon />
                 {tab.label}
               </button>
             )

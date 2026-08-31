@@ -4,7 +4,7 @@ This file has two layers. **Current** is what ships. **Planned** is the module s
 
 ## Current (Korean v0.1)
 
-Single-page Vite + React app. No router library: `App.tsx` holds `tab` state and renders one view. No `src/languages/` or `src/core/` directories.
+Single-page Vite + React app. No router library: `App.tsx` syncs tab/mode to `location.hash` (`src/utils/hashRoute.ts`) and renders one view. No `src/languages/` or `src/core/` directories.
 
 ```
 src/
@@ -18,6 +18,7 @@ src/
   utils/speech.ts
   utils/youtube.ts
   utils/progressHonesty.ts  # next action + skill gates
+  utils/hashRoute.ts        # #/learn/watch etc.
   data/videos.ts
 ```
 
@@ -43,7 +44,7 @@ src/
 ```
 
 - **Curriculum** is static TypeScript data, not fetched.
-- **Phase advance** is client-side: all tasks in `currentPhaseId` checked → next phase id.
+- **Current phase** is the first phase whose tasks are not all checked. Unchecking an earlier task retreats `currentPhaseId`.
 - **PWA**: service worker + manifest via `vite-plugin-pwa` in `vite.config.ts`. Offline after first load; data is still localStorage, not a remote cache of user progress.
 - **Anki**: Drama phrases download as tab-separated Anki import (`#deck:Waypoint Korean Phrases`) or CSV. Not a sync API.
 
@@ -58,7 +59,7 @@ src/
 | PWA | vite-plugin-pwa |
 | Lint | oxlint |
 | Persistence | `localStorage` only |
-| Tests | none |
+| Tests | node:test on hangul, youtube, honesty, hash routes |
 
 See `package.json` for exact versions.
 
