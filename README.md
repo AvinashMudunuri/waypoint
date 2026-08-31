@@ -45,13 +45,10 @@ Open http://localhost:5173
 
 | Tab | What it does |
 |-----|-------------|
-| **Home** | Current phase progress, stats, today's focus |
-| **Phases** | 4-phase curriculum with checkable tasks + resource links |
-| **Hangul** | Alphabet chart + char↔sound quiz + tap-to-hear (`ko-KR` device TTS) |
-| **Watch** | In-app YouTube player; tracks how far you got (80% = done) |
-| **Routine** | Weekly study/speaking/drama schedule tracker |
-| **Drama** | Capture phrases from K-dramas, hear them, Anki export |
-| **Goals** | Realistic milestone timeline |
+| **Today** | One next action from live progress (not a brochure) |
+| **Learn** | Hangul chart/quiz + YouTube player with watch % |
+| **Log** | Weekly routine + drama phrase miner / Anki export |
+| **Path** | 4 phases + goals (skill-gated, not calendar) |
 
 Progress saves in your browser (localStorage). No account needed.
 

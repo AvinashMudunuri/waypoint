@@ -11,10 +11,12 @@ import {
 } from '../data/hangul'
 import { SpeakButton } from './SpeakButton'
 import { isSpeechAvailable, speakKorean, warmSpeechVoices } from '../utils/speech'
+import { hangulRecentStats } from '../utils/progressHonesty'
 
 interface HangulViewProps {
-  stats: { correct: number; total: number; streak: number }
+  stats: { correct: number; total: number; streak: number; recent?: boolean[] }
   onAnswer: (correct: boolean) => void
+  startInQuiz?: boolean
 }
 
 interface Question {
@@ -60,16 +62,25 @@ function buildQuestion(mode: QuizMode, set: QuizSet): Question {
   }
 }
 
-export function HangulView({ stats, onAnswer }: HangulViewProps) {
-  const [mode, setMode] = useState<'learn' | 'quiz'>('learn')
+export function HangulView({ stats, onAnswer, startInQuiz = false }: HangulViewProps) {
+  const [mode, setMode] = useState<'learn' | 'quiz'>(startInQuiz ? 'quiz' : 'learn')
   const [quizMode, setQuizMode] = useState<QuizMode>('char-to-sound')
   const [quizSet, setQuizSet] = useState<QuizSet>('consonants')
   const [question, setQuestion] = useState<Question>(() => buildQuestion('char-to-sound', 'consonants'))
   const [selected, setSelected] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
+  const [playingKey, setPlayingKey] = useState<string | null>(null)
 
-  const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+  const recent = hangulRecentStats(stats.recent ?? [])
   const canSpeak = isSpeechAvailable()
+
+  const play = (key: string, text: string) => {
+    setPlayingKey(key)
+    speakKorean(text, {
+      onStart: () => setPlayingKey(key),
+      onEnd: () => setPlayingKey((cur) => (cur === key ? null : cur)),
+    })
+  }
 
   useEffect(() => {
     warmSpeechVoices()
@@ -81,13 +92,13 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
     setFeedback(null)
   }, [quizMode, quizSet])
 
-  const handleSelect = (option: string) => {
+  const handleSelect = useCallback((option: string) => {
     if (selected) return
     setSelected(option)
     const isCorrect = option === question.correctAnswer
     setFeedback(isCorrect ? 'correct' : 'wrong')
     onAnswer(isCorrect)
-  }
+  }, [selected, question, onAnswer])
 
   const handleModeChange = (newMode: QuizMode) => {
     setQuizMode(newMode)
@@ -102,6 +113,30 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
     setSelected(null)
     setFeedback(null)
   }
+
+  useEffect(() => {
+    if (mode !== 'quiz') return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      const n = Number(e.key)
+      if (n >= 1 && n <= 4 && question.options[n - 1]) {
+        e.preventDefault()
+        handleSelect(question.options[n - 1])
+        return
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && feedback) {
+        e.preventDefault()
+        nextQuestion()
+        return
+      }
+      if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault()
+        play(question.target.char, spokenHangul(question.target))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mode, question, feedback, nextQuestion, handleSelect])
 
   const chartSections = useMemo(
     () => [
@@ -118,8 +153,8 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
           <div>
             <h2 className="font-display text-2xl font-bold">Hangul Practice</h2>
             <p className="text-sm text-ink-muted mt-1">
-              Learn the alphabet in a week. Study the chart, then test yourself.
-              {canSpeak && ' Tap a letter to hear it (your device Korean voice).'}
+              Tap the speaker. On iPhone the silent/ringer switch often mutes this voice
+              even when media (YouTube) still plays — use headphones, or turn the ringer on.
             </p>
           </div>
           <button
@@ -138,16 +173,26 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
                 <button
                   key={c.char}
                   type="button"
-                  onClick={() => canSpeak && speakKorean(spokenHangul(c))}
-                  className="p-3 bg-cream rounded-xl text-center hover:bg-cream-dark transition-colors"
+                  onClick={() => canSpeak && play(c.char, spokenHangul(c))}
+                  className={`p-3 bg-cream rounded-xl text-center hover:bg-cream-dark transition-colors ${
+                    playingKey === c.char ? 'ring-2 ring-coral bg-coral/5' : ''
+                  }`}
                   aria-label={
                     canSpeak
                       ? `Pronounce ${c.char}, ${c.romanization}`
                       : `${c.char}, ${c.romanization}`
                   }
+                  aria-pressed={playingKey === c.char}
                 >
                   <p className="text-3xl font-bold text-ink">{c.char}</p>
                   <p className="text-sm font-semibold text-coral mt-1">{c.romanization}</p>
+                  {canSpeak && (
+                    <span className="mt-1 inline-flex justify-center text-coral" aria-hidden>
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                        <path d="M4 9v6h4l5 4V5L8 9H4zm11.5 3c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.74 2.5-2.26 2.5-4.02z" />
+                      </svg>
+                    </span>
+                  )}
                   {c.hint && <p className="text-[10px] text-ink-muted mt-1 leading-tight">{c.hint}</p>}
                 </button>
               ))}
@@ -158,9 +203,8 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
         <div className="bg-sage-light/50 rounded-2xl p-5 border border-sage/20">
           <h3 className="font-display font-semibold text-sage mb-2">How Hangul works</h3>
           <p className="text-sm text-ink-muted">
-            Letters are grouped into syllable blocks. Each block has a consonant + vowel
-            (e.g. ㄱ + ㅏ = 가 "ga"). Once you know the 14 consonants and 10 vowels,
-            you can read any Korean word.
+            A block is onset + vowel (+ optional batchim). About 40 pieces, not thousands
+            of characters. ㄱ + ㅏ = 가.
           </p>
         </div>
       </div>
@@ -173,7 +217,10 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
         <div>
           <h2 className="font-display text-2xl font-bold">Hangul Quiz</h2>
           <p className="text-sm text-ink-muted mt-1">
-            {stats.correct}/{stats.total} correct · {accuracy}% · streak {stats.streak}
+            {recent.sample === 0
+              ? 'No recent answers yet'
+              : `Last ${recent.sample}: ${recent.percent}% · streak ${stats.streak}`}
+            {recent.sample > 0 && recent.sample < 10 && ' · need 10 to count'}
           </p>
         </div>
         <button
@@ -221,12 +268,15 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
               text={spokenHangul(question.target)}
               label={`Pronounce ${question.target.char}`}
               className="w-11 h-11 bg-cream"
+              playing={playingKey === question.target.char}
+              onPlaying={(on) => setPlayingKey(on ? question.target.char : null)}
             />
           )}
         </div>
 
+        <p className="text-[11px] text-ink-muted">Keys 1–4 answer · P hear · Enter next</p>
         <div className="grid grid-cols-2 gap-3">
-          {question.options.map((option) => {
+          {question.options.map((option, i) => {
             let style = 'bg-cream hover:bg-cream-dark text-ink'
             if (selected) {
               if (option === question.correctAnswer) {
@@ -245,6 +295,7 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
                 disabled={!!selected}
                 className={`py-4 rounded-xl text-lg font-semibold transition-colors ${style}`}
               >
+                <span className="block text-[10px] text-ink-muted font-normal">{i + 1}</span>
                 {option}
               </button>
             )

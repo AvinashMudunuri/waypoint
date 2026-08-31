@@ -1,5 +1,6 @@
 import type { Phase } from '../types'
 import { catalog } from '../data/videos'
+import { phaseTasksComplete } from '../utils/progressHonesty'
 
 interface PhasesViewProps {
   phases: Phase[]
@@ -23,13 +24,13 @@ export function PhasesView({
       <div>
         <h2 className="font-display text-2xl font-bold">Your 4 Phases</h2>
         <p className="text-sm text-ink-muted mt-1">
-          Complete all tasks in a phase to graduate. No infinite levels.
+          Complete means every box in that phase is still on.
         </p>
       </div>
 
       {phases.map((phase) => {
-        const isCurrent = phase.id === currentPhaseId
-        const isPast = phases.findIndex((p) => p.id === currentPhaseId) > phases.findIndex((p) => p.id === phase.id)
+        const isPast = phaseTasksComplete(phase, completedTasks)
+        const isCurrent = phase.id === currentPhaseId && !isPast
         const percent = phaseProgress(phase.id)
 
         return (

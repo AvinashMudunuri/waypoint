@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import type { DramaPhrase } from '../types'
 import { SpeakButton } from './SpeakButton'
 import { exportPhrasesToAnki, exportPhrasesToCsv } from '../utils/ankiExport'
@@ -17,13 +17,14 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
   const [notes, setNotes] = useState('')
   const [expanded, setExpanded] = useState(false)
   const [exportMsg, setExportMsg] = useState('')
+  const [playingId, setPlayingId] = useState<string | null>(null)
   const canSpeak = isSpeechAvailable()
 
   useEffect(() => {
     warmSpeechVoices()
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!korean.trim() || !english.trim()) return
     onAdd({ korean: korean.trim(), english: english.trim(), show: show.trim() || 'Unknown', notes: notes.trim() || undefined })
@@ -46,7 +47,7 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
       <div>
         <h2 className="font-display text-2xl font-bold">Drama Phrase Miner</h2>
         <p className="text-sm text-ink-muted mt-1">
-          Pause while watching, capture the phrase, review later. Export to Anki when ready.
+          Lines you typed. Hear them on this device. Export to Anki when you want.
         </p>
       </div>
 
@@ -151,6 +152,8 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
                       text={phrase.korean}
                       label={`Pronounce ${phrase.korean}`}
                       className="w-8 h-8"
+                      playing={playingId === phrase.id}
+                      onPlaying={(on) => setPlayingId(on ? phrase.id : null)}
                     />
                   )}
                 </div>

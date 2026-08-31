@@ -32,13 +32,13 @@ npm run test     # node:test on spokenHangul mapping
 npm run preview  # serve dist
 ```
 
-`npm run test` covers `spokenHangul` only (`src/data/hangul.test.ts`). There is no component test suite. Do not claim UI or TTS quality from that script.
+`npm run test` covers spoken Hangul mapping, YouTube URL helpers, hash routes, and next-action / milestone honesty. There is no component test suite.
 
 ## Layout (as built)
 
 ```
 src/
-  App.tsx                 # tab state + wires useProgress into views
+  App.tsx                 # hash routes + wires useProgress into views
   types.ts                # Phase, Task, AppProgress, Tab, …
   index.css               # Tailwind v4
   data/
@@ -53,9 +53,18 @@ src/
     speech.ts             # Web Speech API, lang ko-KR
 ```
 
-Tabs (`types.ts` `Tab`): `home` | `phases` | `hangul` | `watch` | `routine` | `drama` | `milestones` (UI label: Goals).
+Tabs (`types.ts` `Tab`): `today` | `learn` | `log` | `path`. Hash routes (`src/utils/hashRoute.ts`): `#/today`, `#/learn`, `#/learn/quiz`, `#/learn/watch`, `#/log`, `#/log/phrases`, `#/path`, `#/path/goals`. Refresh keeps the same screen.
+
+- **Today**: one computed next action (`decideNextAction` in `src/utils/progressHonesty.ts`)
+- **Learn**: Hangul practice/quiz + Watch (YouTube study only)
+- **Log**: weekly routine + drama phrases
+- **Path**: phases + skill-gated goals
+
+Do not add a fifth primary tab. Watch is a Learn mode, not a peer of Hangul.
 
 Watch is **YouTube study videos only**. Embed via IFrame API (`src/components/YoutubePlayer.tsx`). Progress keys: `videoProgress`, `playlistVideos`, `customWatch` on `AppProgress`. Completing every video in a catalog playlist at 80%+ can auto-check a linked task (`catalog[].taskId`). Do not embed Viki/Netflix or other licensed drama hosts.
+
+Hangul “ready” is last 10+ answers at 80%+ (`hangulStats.recent`), not lifetime correct/total. Goals “you are here” uses `skillMilestoneIndex` (tasks + hangul ready). Fluency is never auto-marked. Phase “Complete” means every task checkbox is still on — not `currentPhaseId`. `currentPhaseId` is always the first incomplete phase (`currentPhaseFromTasks`); unchecking an earlier task retreats it.
 
 Korean copy and Hangul UI are hardcoded (e.g. `Layout` subtitle “Korean · Honest milestones”). Changing language is a product change, not a config flip.
 
@@ -64,7 +73,7 @@ Korean copy and Hangul UI are hardcoded (e.g. `Layout` subtitle “Korean · Hon
 - Key: `waypoint-progress`
 - Legacy migrate-once: `korean-path-progress` → current key
 - Shape: `AppProgress` in `types.ts` (completed tasks, current phase, phrases, routine checks, start date, hangul stats)
-- Completing every task in the current phase advances `currentPhaseId` to the next phase (`useProgress.toggleTask`)
+- `currentPhaseId` is derived from checkboxes (`currentPhaseFromTasks`): first incomplete phase, or the last phase if all are done. Unchecking retreats.
 - Clearing site data wipes progress. There is no export of progress (only phrase Anki/CSV).
 
 ## Product constraints

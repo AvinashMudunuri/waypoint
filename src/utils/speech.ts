@@ -1,10 +1,10 @@
 let voicesWarmed = false
+let currentUtterance: SpeechSynthesisUtterance | null = null
 
 export function isSpeechAvailable(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window
 }
 
-/** Browsers populate voices asynchronously. Call on Hangul/Drama mount. */
 export function warmSpeechVoices(): void {
   if (!isSpeechAvailable() || voicesWarmed) return
   voicesWarmed = true
@@ -20,16 +20,31 @@ function koreanVoice(): SpeechSynthesisVoice | undefined {
     .find((v) => v.lang.toLowerCase().startsWith('ko'))
 }
 
-export function speakKorean(text: string): void {
+export function speakKorean(
+  text: string,
+  handlers?: { onStart?: () => void; onEnd?: () => void },
+): void {
   const trimmed = text.trim()
-  if (!trimmed || !isSpeechAvailable()) return
+  if (!trimmed || !isSpeechAvailable()) {
+    handlers?.onEnd?.()
+    return
+  }
 
   window.speechSynthesis.cancel()
-
-  const utterance = new SpeechSynthesisUtterance(trimmed)
-  utterance.lang = 'ko-KR'
-  utterance.rate = 0.8
+  currentUtterance = new SpeechSynthesisUtterance(trimmed)
+  currentUtterance.lang = 'ko-KR'
+  currentUtterance.rate = 0.85
   const voice = koreanVoice()
-  if (voice) utterance.voice = voice
-  window.speechSynthesis.speak(utterance)
+  if (voice) currentUtterance.voice = voice
+
+  currentUtterance.onstart = () => handlers?.onStart?.()
+  const finish = () => {
+    currentUtterance = null
+    handlers?.onEnd?.()
+  }
+  currentUtterance.onend = finish
+  currentUtterance.onerror = finish
+
+  window.speechSynthesis.speak(currentUtterance)
+  window.speechSynthesis.resume()
 }
