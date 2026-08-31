@@ -32,7 +32,7 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
         {children}
       </main>
 
-      <nav className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-cream-dark" aria-label="Primary">
+      <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-t border-cream-dark" aria-label="Primary">
         <div className="max-w-3xl mx-auto flex">
           {tabs.map((tab) => {
             const current = activeTab === tab.id
