@@ -10,6 +10,7 @@ const tabs = [
   { id: 'home', label: 'Home', icon: '⌂' },
   { id: 'phases', label: 'Phases', icon: '◈' },
   { id: 'hangul', label: 'Hangul', icon: '가' },
+  { id: 'watch', label: 'Watch', icon: '▷' },
   { id: 'routine', label: 'Routine', icon: '☰' },
   { id: 'drama', label: 'Drama', icon: '▶' },
   { id: 'milestones', label: 'Goals', icon: '◎' },

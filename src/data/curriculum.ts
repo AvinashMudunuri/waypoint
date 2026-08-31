@@ -16,7 +16,7 @@ export const phases: Phase[] = [
       { id: 'h5', label: 'Daily 15-min reading drill', description: '5 days of focused Hangul practice' },
     ],
     resources: [
-      { name: 'GO! Billy Korean — Hangul', url: 'https://www.youtube.com/playlist?list=PLbFrUoo86xWv3rnR0hCL4vV8X9dAnFJ01', type: 'youtube' },
+      { name: 'GO! Billy Korean — Hangul', url: 'https://www.youtube.com/playlist?list=PLbFrQnW0BNMVrHEJCOYWbLnXFzj4bl5z0', type: 'youtube' },
       { name: 'Hangul Day (free course)', url: 'https://www.howtostudykorean.com/unit0/', type: 'website' },
     ],
   },

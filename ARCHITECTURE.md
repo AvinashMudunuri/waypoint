@@ -16,6 +16,10 @@ src/
   components/*View.tsx
   utils/ankiExport.ts
   utils/speech.ts         # device TTS, not recorded clips
+  utils/youtube.ts        # URL parse + watch %
+  data/videos.ts          # YouTube catalog
+  components/WatchView.tsx
+  components/YoutubePlayer.tsx
 ```
 
 ### Runtime model
