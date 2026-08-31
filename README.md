@@ -11,6 +11,16 @@ Honest milestones on your language journey — finite phases with clear exit cri
 - **Media immersion** — turn the shows you already watch into study
 - **Honest milestones** — realistic timelines for adult learners
 
+## Docs
+
+| Doc | Role |
+|-----|------|
+| [AGENTS.md](./AGENTS.md) | How to run, change, and verify this repo (for people and agents) |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | As-built layout, then the **planned** multi-language split |
+| This file | Product overview, Korean features, **roadmap (todo list)** |
+
+There is no separate `TODO.md`. Unbuilt work is the Roadmap section below.
+
 ## Quick Start
 
 ```bash
@@ -19,6 +29,8 @@ npm run dev
 ```
 
 Open http://localhost:5173
+
+`npm run lint` (oxlint) and `npm run build` (`tsc -b && vite build`) are the verification commands. There is no test suite yet.
 
 ## Current languages
 
@@ -53,20 +65,27 @@ Works offline after first load.
 
 In the Drama tab, tap **Export for Anki** to download a `.txt` file. In Anki: File → Import → select the file.
 
-## Roadmap
+## Roadmap (todo)
 
-- [ ] Language picker (multi-language architecture)
+Source of truth for unbuilt work. None of these exist in `src/` today.
+
+- [ ] Language picker (see `ARCHITECTURE.md` Planned)
 - [ ] Japanese module (hiragana quiz, anime miner)
 - [ ] German module
 - [ ] Tutor booking reminders
 - [ ] Cloud sync / accounts
+- [ ] Automated tests (`package.json` has no `test` script)
 
 ## Tech Stack
 
-- Vite + React + TypeScript
-- Tailwind CSS v4
-- vite-plugin-pwa
-- localStorage for persistence
+Matches `package.json` (app `0.1.0`):
+
+- Vite 8 + React 19 + TypeScript 6
+- Tailwind CSS v4 (`@tailwindcss/vite`)
+- vite-plugin-pwa (installable; offline after first load)
+- oxlint
+- localStorage key `waypoint-progress` (legacy: `korean-path-progress`)
+- No server, accounts, or database
 
 ## Origin
 
