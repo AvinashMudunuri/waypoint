@@ -10,8 +10,8 @@ interface YoutubePlayerProps {
 }
 
 function snapshot(player: YT.Player, completed: boolean) {
-  const data = player.getVideoData()
-  const videoId = data.video_id
+  const data = player.getVideoData?.()
+  const videoId = data?.video_id
   if (!videoId) return null
   return {
     videoId,
@@ -22,8 +22,17 @@ function snapshot(player: YT.Player, completed: boolean) {
   }
 }
 
+function embedSrc(item: Watchable): string {
+  const origin = encodeURIComponent(window.location.origin)
+  const common = `enablejsapi=1&rel=0&modestbranding=1&playsinline=1&origin=${origin}`
+  if (item.kind === 'playlist') {
+    return `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(item.youtubeId)}&${common}`
+  }
+  return `https://www.youtube.com/embed/${encodeURIComponent(item.youtubeId)}?${common}`
+}
+
 export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }: YoutubePlayerProps) {
-  const hostRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const playerRef = useRef<YT.Player | null>(null)
   const progressRef = useRef(videoProgress)
   const onProgressRef = useRef(onProgress)
@@ -36,6 +45,9 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
   })
 
   useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+
     let cancelled = false
     let poll: number | undefined
 
@@ -56,36 +68,16 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
       if (ids?.length) onPlaylistRef.current?.(item.youtubeId, ids)
     }
 
-    const mount = async () => {
+    const attach = async () => {
       await loadYoutubeApi()
-      if (cancelled || !hostRef.current) return
-      hostRef.current.replaceChildren()
-      const mount = document.createElement('div')
-      mount.style.width = '100%'
-      mount.style.height = '100%'
-      hostRef.current.appendChild(mount)
+      if (cancelled || !iframeRef.current) return
 
-      const playerVars: Record<string, string | number> = {
-        rel: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        origin: window.location.origin,
-      }
-
-      const options: YT.PlayerOptions = {
-        width: '100%',
-        height: '100%',
-        playerVars,
+      playerRef.current = new window.YT!.Player(iframeRef.current, {
         events: {
           onReady: (e) => {
-            if (item.kind === 'playlist') {
-              e.target.cuePlaylist({ list: item.youtubeId, listType: 'playlist' })
-            } else {
-              e.target.cueVideoById(item.youtubeId)
-            }
             rememberList(e.target)
-            const data = e.target.getVideoData()
-            const saved = data.video_id ? progressRef.current[data.video_id] : undefined
+            const data = e.target.getVideoData?.()
+            const saved = data?.video_id ? progressRef.current[data.video_id] : undefined
             if (saved && saved.seconds > 3 && !saved.completed) {
               e.target.seekTo(saved.seconds, true)
             }
@@ -108,12 +100,10 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
             }
           },
         },
-      }
-
-      playerRef.current = new window.YT!.Player(mount, options)
+      })
     }
 
-    void mount()
+    void attach()
 
     return () => {
       cancelled = true
@@ -132,7 +122,15 @@ export function YoutubePlayer({ item, videoProgress, onProgress, onPlaylistIds }
 
   return (
     <div className="aspect-video w-full overflow-hidden rounded-2xl bg-ink">
-      <div ref={hostRef} className="h-full w-full" />
+      <iframe
+        key={`${item.kind}:${item.youtubeId}`}
+        ref={iframeRef}
+        title={item.title}
+        src={embedSrc(item)}
+        className="h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
     </div>
   )
 }
