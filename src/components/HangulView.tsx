@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   type HangulChar,
   type QuizMode,
@@ -7,7 +7,10 @@ import {
   hangulConsonants,
   hangulVowels,
   pickRandom,
+  spokenHangul,
 } from '../data/hangul'
+import { SpeakButton } from './SpeakButton'
+import { isSpeechAvailable, speakKorean, warmSpeechVoices } from '../utils/speech'
 
 interface HangulViewProps {
   stats: { correct: number; total: number; streak: number }
@@ -66,6 +69,11 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
 
   const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+  const canSpeak = isSpeechAvailable()
+
+  useEffect(() => {
+    warmSpeechVoices()
+  }, [])
 
   const nextQuestion = useCallback(() => {
     setQuestion(buildQuestion(quizMode, quizSet))
@@ -111,6 +119,7 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
             <h2 className="font-display text-2xl font-bold">Hangul Practice</h2>
             <p className="text-sm text-ink-muted mt-1">
               Learn the alphabet in a week. Study the chart, then test yourself.
+              {canSpeak && ' Tap a letter to hear it (your device Korean voice).'}
             </p>
           </div>
           <button
@@ -126,11 +135,21 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
             <h3 className="font-display font-semibold mb-3">{section.title}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {section.chars.map((c) => (
-                <div key={c.char} className="p-3 bg-cream rounded-xl text-center">
+                <button
+                  key={c.char}
+                  type="button"
+                  onClick={() => canSpeak && speakKorean(spokenHangul(c))}
+                  className="p-3 bg-cream rounded-xl text-center hover:bg-cream-dark transition-colors"
+                  aria-label={
+                    canSpeak
+                      ? `Pronounce ${c.char}, ${c.romanization}`
+                      : `${c.char}, ${c.romanization}`
+                  }
+                >
                   <p className="text-3xl font-bold text-ink">{c.char}</p>
                   <p className="text-sm font-semibold text-coral mt-1">{c.romanization}</p>
                   {c.hint && <p className="text-[10px] text-ink-muted mt-1 leading-tight">{c.hint}</p>}
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -195,7 +214,16 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
 
       <div className="bg-white rounded-2xl border border-cream-dark p-6 text-center space-y-4">
         <p className="text-sm text-ink-muted">{question.promptLabel}</p>
-        <p className="font-display text-6xl font-bold text-ink py-4">{question.prompt}</p>
+        <div className="flex items-center justify-center gap-3 py-4">
+          <p className="font-display text-6xl font-bold text-ink">{question.prompt}</p>
+          {canSpeak && (
+            <SpeakButton
+              text={spokenHangul(question.target)}
+              label={`Pronounce ${question.target.char}`}
+              className="w-11 h-11 bg-cream"
+            />
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           {question.options.map((option) => {

@@ -15,6 +15,7 @@ src/
   hooks/useProgress.ts    # sole persistence + mutations
   components/*View.tsx
   utils/ankiExport.ts
+  utils/speech.ts         # device TTS, not recorded clips
 ```
 
 ### Runtime model

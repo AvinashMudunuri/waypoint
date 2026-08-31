@@ -30,7 +30,7 @@ npm run dev
 
 Open http://localhost:5173
 
-`npm run lint` (oxlint) and `npm run build` (`tsc -b && vite build`) are the verification commands. There is no test suite yet.
+`npm run lint` (oxlint), `npm run test` (Hangul spoken-form mapping), and `npm run build` (`tsc -b && vite build`) are the verification commands. There is no component test suite.
 
 ## Current languages
 
@@ -47,9 +47,9 @@ Open http://localhost:5173
 |-----|-------------|
 | **Home** | Current phase progress, stats, today's focus |
 | **Phases** | 4-phase curriculum with checkable tasks + resource links |
-| **Hangul** | Interactive alphabet chart + char↔sound quiz |
+| **Hangul** | Alphabet chart + char↔sound quiz + tap-to-hear (`ko-KR` device TTS) |
 | **Routine** | Weekly study/speaking/drama schedule tracker |
-| **Drama** | Capture phrases from K-dramas + Anki export |
+| **Drama** | Capture phrases from K-dramas, hear them, Anki export |
 | **Goals** | Realistic milestone timeline |
 
 Progress saves in your browser (localStorage). No account needed.
@@ -74,7 +74,7 @@ Source of truth for unbuilt work. None of these exist in `src/` today.
 - [ ] German module
 - [ ] Tutor booking reminders
 - [ ] Cloud sync / accounts
-- [ ] Automated tests (`package.json` has no `test` script)
+- [ ] Broader automated tests (only `spokenHangul` mapping is covered today)
 
 ## Tech Stack
 
