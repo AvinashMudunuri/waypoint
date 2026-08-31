@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import { phases, milestones } from './data/curriculum'
-import { catalog } from './data/videos'
-import { useProgress } from './hooks/useProgress'
-import { playlistWatchSummary } from './utils/youtube'
-import { Layout } from './components/Layout'
+import { milestones, phases } from './data/curriculum'
 import { InstallPrompt } from './components/InstallPrompt'
 import { HomeView } from './components/HomeView'
-import { PhasesView } from './components/PhasesView'
-import { HangulView } from './components/HangulView'
-import { RoutineView } from './components/RoutineView'
-import { DramaView } from './components/DramaView'
-import { WatchView } from './components/WatchView'
-import { MilestonesView } from './components/MilestonesView'
-import type { Tab, VideoWatch } from './types'
+import { Layout } from './components/Layout'
+import { LearnView } from './components/LearnView'
+import { LogView } from './components/LogView'
+import { PathView } from './components/PathView'
+import { useProgress } from './hooks/useProgress'
+import {
+  decideNextAction,
+  hangulPlaylistPercent,
+  hangulRecentStats,
+  skillMilestoneIndex,
+  type LearnMode,
+  type LogMode,
+  type PathMode,
+} from './utils/progressHonesty'
+import type { Tab } from './types'
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('home')
+  const [tab, setTab] = useState<Tab>('today')
+  const [learnMode, setLearnMode] = useState<LearnMode>('practice')
+  const [startQuiz, setStartQuiz] = useState(false)
+  const [logMode, setLogMode] = useState<LogMode>('routine')
+  const [pathMode, setPathMode] = useState<PathMode>('phases')
   const [watchFocusId, setWatchFocusId] = useState<string | null>(null)
+
   const {
     progress,
     toggleTask,
@@ -35,107 +44,118 @@ export default function App() {
     addCustomWatch,
   } = useProgress()
 
-  const openWatch = (id?: string) => {
-    if (id) setWatchFocusId(id)
-    setTab('watch')
+  const playlist = hangulPlaylistPercent(progress.playlistVideos, progress.videoProgress)
+  const hangul = hangulRecentStats(progress.hangulStats)
+  const next = decideNextAction({
+    completedTasks: progress.completedTasks,
+    hangulRecent: progress.hangulStats.recent ?? [],
+    playlistPercent: playlist.percent,
+    playlistKnown: playlist.known,
+    routineDone: routineDoneThisWeek,
+    phraseCount: progress.dramaPhrases.length,
+  })
+  const milestonesState = skillMilestoneIndex({
+    completedTasks: progress.completedTasks,
+    hangulReady: hangul.ready,
+  })
+
+  const go = (nextTab: Tab, opts?: { learn?: LearnMode; quiz?: boolean; log?: LogMode; path?: PathMode; watchId?: string }) => {
+    if (opts?.learn) setLearnMode(opts.learn)
+    if (opts?.quiz !== undefined) setStartQuiz(opts.quiz)
+    if (opts?.log) setLogMode(opts.log)
+    if (opts?.path) setPathMode(opts.path)
+    if (opts?.watchId) setWatchFocusId(opts.watchId)
+    setTab(nextTab)
+  }
+
+  const doNext = () => {
+    go(next.tab, {
+      learn: next.learnMode,
+      quiz: next.learnMode === 'practice',
+      log: next.logMode,
+      path: next.pathMode,
+      watchId: next.learnMode === 'watch' ? 'billy-hangul' : undefined,
+    })
   }
 
   const renderView = () => {
     switch (tab) {
-      case 'home':
+      case 'today':
         return (
           <HomeView
             currentPhase={currentPhase}
             phasePercent={phaseProgress(currentPhase.id)}
-            overallPercent={overallProgress}
             daysSinceStart={daysSinceStart}
-            phraseCount={progress.dramaPhrases.length}
-            routineDone={routineDoneThisWeek}
-            hangulAccuracy={
-              progress.hangulStats.total > 0
-                ? Math.round((progress.hangulStats.correct / progress.hangulStats.total) * 100)
-                : 0
+            hangulLabel={
+              hangul.sample === 0
+                ? 'not started'
+                : hangul.ready
+                  ? `last ${hangul.sample}: ${hangul.percent}%`
+                  : `last ${hangul.sample}: ${hangul.percent}% (need 10 at 80%+)`
             }
-            watchPercent={watchHomePercent(
-              progress.playlistVideos,
-              progress.videoProgress,
-            )}
-            onNavigate={setTab}
-            onWatch={() => openWatch('billy-hangul')}
+            playlistLabel={playlist.known ? `${playlist.percent}%` : 'not started'}
+            next={next}
+            onDoNext={doNext}
           />
         )
-      case 'phases':
+      case 'learn':
         return (
-          <PhasesView
-            phases={phases}
-            currentPhaseId={progress.currentPhaseId}
-            completedTasks={progress.completedTasks}
-            phaseProgress={phaseProgress}
-            onToggleTask={toggleTask}
-            onWatch={(id) => openWatch(id)}
-          />
-        )
-      case 'watch':
-        return (
-          <WatchView
-            key={watchFocusId ?? 'watch'}
+          <LearnView
+            mode={learnMode}
+            onMode={(m) => {
+              setLearnMode(m)
+              if (m === 'practice') setStartQuiz(false)
+            }}
+            startQuiz={startQuiz}
+            hangulStats={progress.hangulStats}
+            onHangulAnswer={recordHangulAnswer}
             videoProgress={progress.videoProgress}
             playlistVideos={progress.playlistVideos}
             customWatch={progress.customWatch}
-            initialId={watchFocusId}
+            watchFocusId={watchFocusId}
             onProgress={recordVideoProgress}
             onPlaylistIds={rememberPlaylist}
             onAddCustom={addCustomWatch}
           />
         )
-      case 'hangul':
+      case 'log':
         return (
-          <HangulView
-            stats={progress.hangulStats}
-            onAnswer={recordHangulAnswer}
-          />
-        )
-      case 'routine':
-        return (
-          <RoutineView
+          <LogView
+            mode={logMode}
+            onMode={setLogMode}
             routineChecks={progress.routineChecks}
-            onToggle={toggleRoutine}
+            onToggleRoutine={toggleRoutine}
             onResetWeek={resetWeek}
-          />
-        )
-      case 'drama':
-        return (
-          <DramaView
             phrases={progress.dramaPhrases}
-            onAdd={addPhrase}
-            onRemove={removePhrase}
+            onAddPhrase={addPhrase}
+            onRemovePhrase={removePhrase}
           />
         )
-      case 'milestones':
+      case 'path':
         return (
-          <MilestonesView
+          <PathView
+            mode={pathMode}
+            onMode={setPathMode}
+            phases={phases}
+            currentPhaseId={progress.currentPhaseId}
+            completedTasks={progress.completedTasks}
+            phaseProgress={phaseProgress}
+            onToggleTask={toggleTask}
+            onWatch={(id) => go('learn', { learn: 'watch', watchId: id })}
             milestones={milestones}
             daysSinceStart={daysSinceStart}
             overallPercent={overallProgress}
+            reached={milestonesState.reached}
+            currentMilestone={milestonesState.current}
           />
         )
     }
   }
 
   return (
-    <Layout activeTab={tab} onTabChange={(t) => setTab(t as Tab)}>
+    <Layout activeTab={tab} onTabChange={setTab}>
       <InstallPrompt />
       {renderView()}
     </Layout>
   )
-}
-
-function watchHomePercent(
-  playlistVideos: Record<string, string[]>,
-  videoProgress: Record<string, VideoWatch>,
-): number {
-  const hangul = catalog.find((v) => v.id === 'billy-hangul')
-  if (!hangul) return 0
-  const ids = playlistVideos[hangul.youtubeId] ?? []
-  return playlistWatchSummary(ids, videoProgress).percent
 }

@@ -31,9 +31,15 @@ export function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
-  if (isInstalled || dismissed || !deferredPrompt) return null
+  const isIos =
+    typeof navigator !== 'undefined' &&
+    /iphone|ipad|ipod/i.test(navigator.userAgent)
+
+  if (isInstalled || dismissed) return null
+  if (!deferredPrompt && !isIos) return null
 
   const handleInstall = async () => {
+    if (!deferredPrompt) return
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     if (outcome === 'accepted') setIsInstalled(true)
@@ -50,14 +56,20 @@ export function InstallPrompt() {
       <span className="text-2xl shrink-0">📲</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold">Install Waypoint</p>
-        <p className="text-xs text-white/70">Add to your home screen for quick access</p>
+        <p className="text-xs text-white/70">
+          {deferredPrompt
+            ? 'Add to your home screen for quick access'
+            : 'Safari: Share → Add to Home Screen'}
+        </p>
       </div>
-      <button
-        onClick={handleInstall}
-        className="px-3 py-1.5 bg-coral rounded-lg text-xs font-semibold shrink-0 hover:bg-coral/90"
-      >
-        Install
-      </button>
+      {deferredPrompt && (
+        <button
+          onClick={handleInstall}
+          className="px-3 py-1.5 bg-coral rounded-lg text-xs font-semibold shrink-0 hover:bg-coral/90"
+        >
+          Install
+        </button>
+      )}
       <button
         onClick={handleDismiss}
         className="text-white/50 hover:text-white text-sm shrink-0"

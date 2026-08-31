@@ -13,23 +13,24 @@ src/
   data/curriculum.ts      # phases, milestones, routine
   data/hangul.ts          # script + quiz source
   hooks/useProgress.ts    # sole persistence + mutations
-  components/*View.tsx
+  components/*View.tsx    # Today / Learn / Log / Path shells
   utils/ankiExport.ts
-  utils/speech.ts         # device TTS, not recorded clips
-  utils/youtube.ts        # URL parse + watch %
-  data/videos.ts          # YouTube catalog
-  components/WatchView.tsx
-  components/YoutubePlayer.tsx
+  utils/speech.ts
+  utils/youtube.ts
+  utils/progressHonesty.ts  # next action + skill gates
+  data/videos.ts
 ```
 
 ### Runtime model
 
 ```
 ┌─────────────────────────────────────────┐
-│  Layout (header + bottom tab nav)       │
+│  Layout — Today · Learn · Log · Path    │
 │  ┌───────────────────────────────────┐  │
-│  │  Active view (Home / Phases /     │  │
-│  │  Hangul / Routine / Drama / Goals)│  │
+│  │  Today: one next action           │  │
+│  │  Learn: Hangul | Watch            │  │
+│  │  Log: Routine | Phrases           │  │
+│  │  Path: Phases | Goals             │  │
 │  └───────────────────────────────────┘  │
 └─────────────────────────────────────────┘
                  │

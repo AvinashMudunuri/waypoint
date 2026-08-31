@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { AppProgress, DramaPhrase, VideoWatch, Watchable } from '../types'
 import { catalog } from '../data/videos'
 import { phases } from '../data/curriculum'
+import { appendHangulRecent } from '../utils/progressHonesty'
 import { isWatchComplete, playlistWatchSummary } from '../utils/youtube'
 
 const STORAGE_KEY = 'waypoint-progress'
@@ -13,7 +14,7 @@ const defaultProgress = (): AppProgress => ({
   dramaPhrases: [],
   routineChecks: {},
   startDate: new Date().toISOString(),
-  hangulStats: { correct: 0, total: 0, streak: 0 },
+  hangulStats: { correct: 0, total: 0, streak: 0, recent: [] },
   videoProgress: {},
   playlistVideos: {},
   customWatch: [],
@@ -31,7 +32,11 @@ function loadProgress(): AppProgress {
       return {
         ...defaultProgress(),
         ...parsed,
-        hangulStats: { ...defaultProgress().hangulStats, ...parsed.hangulStats },
+        hangulStats: {
+          ...defaultProgress().hangulStats,
+          ...parsed.hangulStats,
+          recent: parsed.hangulStats?.recent ?? [],
+        },
         videoProgress: parsed.videoProgress ?? {},
         playlistVideos: parsed.playlistVideos ?? {},
         customWatch: parsed.customWatch ?? [],
@@ -151,6 +156,7 @@ export function useProgress() {
           correct: prev.hangulStats.correct + (correct ? 1 : 0),
           total: prev.hangulStats.total + 1,
           streak,
+          recent: appendHangulRecent(prev.hangulStats.recent, correct),
         },
       }
     })

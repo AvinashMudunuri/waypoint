@@ -1,5 +1,6 @@
 import type { Phase } from '../types'
 import { catalog } from '../data/videos'
+import { phaseTasksComplete } from '../utils/progressHonesty'
 
 interface PhasesViewProps {
   phases: Phase[]
@@ -28,8 +29,8 @@ export function PhasesView({
       </div>
 
       {phases.map((phase) => {
-        const isCurrent = phase.id === currentPhaseId
-        const isPast = phases.findIndex((p) => p.id === currentPhaseId) > phases.findIndex((p) => p.id === phase.id)
+        const isPast = phaseTasksComplete(phase, completedTasks)
+        const isCurrent = phase.id === currentPhaseId && !isPast
         const percent = phaseProgress(phase.id)
 
         return (

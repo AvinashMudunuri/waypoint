@@ -81,6 +81,7 @@ export interface HangulStats {
   correct: number
   total: number
   streak: number
+  recent: boolean[]
 }
 
-export type Tab = 'home' | 'phases' | 'hangul' | 'watch' | 'routine' | 'drama' | 'milestones'
+export type Tab = 'today' | 'learn' | 'log' | 'path'

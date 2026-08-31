@@ -4,30 +4,32 @@ interface MilestonesViewProps {
   milestones: Milestone[]
   daysSinceStart: number
   overallPercent: number
+  reached: boolean[]
+  currentIndex: number
 }
 
-export function MilestonesView({ milestones, daysSinceStart, overallPercent }: MilestonesViewProps) {
-  const estimatedMilestone = (() => {
-    if (daysSinceStart < 7) return 0
-    if (daysSinceStart < 60) return 1
-    if (daysSinceStart < 180) return 2
-    if (daysSinceStart < 540) return 3
-    return 4
-  })()
+export function MilestonesView({
+  milestones,
+  daysSinceStart,
+  overallPercent,
+  reached,
+  currentIndex,
+}: MilestonesViewProps) {
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold">Realistic Milestones</h2>
         <p className="text-sm text-ink-muted mt-1">
-          Honest timelines for adult learners with 30–45 min/day. No false promises.
+          Dots move when the app has evidence (quiz, finished phase tasks). Timelines are estimates,
+          not a clock that promotes you.
         </p>
       </div>
 
       <div className="relative">
         {milestones.map((milestone, i) => {
-          const isReached = i <= estimatedMilestone
-          const isCurrent = i === estimatedMilestone
+          const isReached = reached[i]
+          const isCurrent = i === currentIndex && !isReached
 
           return (
             <div key={milestone.id} className="flex gap-4 pb-8 last:pb-0">
@@ -54,7 +56,15 @@ export function MilestonesView({ milestones, daysSinceStart, overallPercent }: M
                 </div>
                 <p className="text-sm text-ink-muted mt-1">{milestone.description}</p>
                 {isCurrent && (
-                  <p className="text-xs text-coral font-semibold mt-2">← You are here (estimated)</p>
+                  <p className="text-xs text-coral font-semibold mt-2">← Here — not yet evidenced</p>
+                )}
+                {isReached && (
+                  <p className="text-xs text-sage font-semibold mt-2">Evidenced in this app</p>
+                )}
+                {i === milestones.length - 1 && (
+                  <p className="text-xs text-ink-muted mt-2">
+                    The app will not mark fluency from checkboxes or calendar time.
+                  </p>
                 )}
               </div>
             </div>

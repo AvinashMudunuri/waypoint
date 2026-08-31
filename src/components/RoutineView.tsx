@@ -4,9 +4,10 @@ interface RoutineViewProps {
   routineChecks: Record<string, boolean>
   onToggle: (key: string) => void
   onResetWeek: () => void
+  onOpenPhrases?: () => void
 }
 
-export function RoutineView({ routineChecks, onToggle, onResetWeek }: RoutineViewProps) {
+export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrases }: RoutineViewProps) {
   const doneCount = routineDayKeys.filter((k) => routineChecks[k]).length
 
   return (
@@ -74,6 +75,16 @@ export function RoutineView({ routineChecks, onToggle, onResetWeek }: RoutineVie
           })}
         </div>
       </div>
+
+      {onOpenPhrases && (
+        <button
+          type="button"
+          onClick={onOpenPhrases}
+          className="w-full py-3 border border-cream-dark rounded-xl text-sm font-semibold hover:bg-cream"
+        >
+          Sunday drama time → log a phrase
+        </button>
+      )}
 
       <div className="bg-coral/5 rounded-2xl p-5 border border-coral/10">
         <h3 className="font-display font-semibold text-coral mb-2">The rule</h3>

@@ -1,19 +1,17 @@
 import type { ReactNode } from 'react'
+import type { Tab } from '../types'
 
 interface LayoutProps {
   children: ReactNode
-  activeTab: string
-  onTabChange: (tab: string) => void
+  activeTab: Tab
+  onTabChange: (tab: Tab) => void
 }
 
-const tabs = [
-  { id: 'home', label: 'Home', icon: '⌂' },
-  { id: 'phases', label: 'Phases', icon: '◈' },
-  { id: 'hangul', label: 'Hangul', icon: '가' },
-  { id: 'watch', label: 'Watch', icon: '▷' },
-  { id: 'routine', label: 'Routine', icon: '☰' },
-  { id: 'drama', label: 'Drama', icon: '▶' },
-  { id: 'milestones', label: 'Goals', icon: '◎' },
+const tabs: { id: Tab; label: string; icon: string }[] = [
+  { id: 'today', label: 'Today', icon: '⌂' },
+  { id: 'learn', label: 'Learn', icon: '가' },
+  { id: 'log', label: 'Log', icon: '☰' },
+  { id: 'path', label: 'Path', icon: '◈' },
 ]
 
 export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
@@ -27,7 +25,6 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
             </h1>
             <p className="text-xs text-ink-muted">Korean · Honest milestones</p>
           </div>
-          <span className="text-2xl" aria-hidden>한</span>
         </div>
       </header>
 
@@ -35,22 +32,25 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
         {children}
       </main>
 
-      <nav className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-cream-dark">
-        <div className="max-w-3xl mx-auto flex overflow-x-auto scrollbar-hide">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex-1 min-w-[56px] flex flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors ${
-                activeTab === tab.id
-                  ? 'text-coral font-semibold'
-                  : 'text-ink-muted hover:text-ink'
-              }`}
-            >
-              <span className="text-base leading-none">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
+      <nav className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-cream-dark" aria-label="Primary">
+        <div className="max-w-3xl mx-auto flex">
+          {tabs.map((tab) => {
+            const current = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onTabChange(tab.id)}
+                aria-current={current ? 'page' : undefined}
+                className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-xs transition-colors ${
+                  current ? 'text-coral font-semibold' : 'text-ink-muted hover:text-ink'
+                }`}
+              >
+                <span className="text-lg leading-none" aria-hidden>{tab.icon}</span>
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
       </nav>
     </div>

@@ -11,10 +11,12 @@ import {
 } from '../data/hangul'
 import { SpeakButton } from './SpeakButton'
 import { isSpeechAvailable, speakKorean, warmSpeechVoices } from '../utils/speech'
+import { hangulRecentStats } from '../utils/progressHonesty'
 
 interface HangulViewProps {
-  stats: { correct: number; total: number; streak: number }
+  stats: { correct: number; total: number; streak: number; recent?: boolean[] }
   onAnswer: (correct: boolean) => void
+  startInQuiz?: boolean
 }
 
 interface Question {
@@ -60,15 +62,15 @@ function buildQuestion(mode: QuizMode, set: QuizSet): Question {
   }
 }
 
-export function HangulView({ stats, onAnswer }: HangulViewProps) {
-  const [mode, setMode] = useState<'learn' | 'quiz'>('learn')
+export function HangulView({ stats, onAnswer, startInQuiz = false }: HangulViewProps) {
+  const [mode, setMode] = useState<'learn' | 'quiz'>(startInQuiz ? 'quiz' : 'learn')
   const [quizMode, setQuizMode] = useState<QuizMode>('char-to-sound')
   const [quizSet, setQuizSet] = useState<QuizSet>('consonants')
   const [question, setQuestion] = useState<Question>(() => buildQuestion('char-to-sound', 'consonants'))
   const [selected, setSelected] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
 
-  const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+  const recent = hangulRecentStats(stats.recent ?? [])
   const canSpeak = isSpeechAvailable()
 
   useEffect(() => {
@@ -118,8 +120,7 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
           <div>
             <h2 className="font-display text-2xl font-bold">Hangul Practice</h2>
             <p className="text-sm text-ink-muted mt-1">
-              Learn the alphabet in a week. Study the chart, then test yourself.
-              {canSpeak && ' Tap a letter to hear it (your device Korean voice).'}
+              Tap a letter to hear it. If the phone is on silent, use headphones.
             </p>
           </div>
           <button
@@ -173,7 +174,10 @@ export function HangulView({ stats, onAnswer }: HangulViewProps) {
         <div>
           <h2 className="font-display text-2xl font-bold">Hangul Quiz</h2>
           <p className="text-sm text-ink-muted mt-1">
-            {stats.correct}/{stats.total} correct · {accuracy}% · streak {stats.streak}
+            {recent.sample === 0
+              ? 'No recent answers yet'
+              : `Last ${recent.sample}: ${recent.percent}% · streak ${stats.streak}`}
+            {recent.sample > 0 && recent.sample < 10 && ' · need 10 to count'}
           </p>
         </div>
         <button

@@ -32,7 +32,7 @@ npm run test     # node:test on spokenHangul mapping
 npm run preview  # serve dist
 ```
 
-`npm run test` covers `spokenHangul` only (`src/data/hangul.test.ts`). There is no component test suite. Do not claim UI or TTS quality from that script.
+`npm run test` covers spoken Hangul mapping, YouTube URL helpers, and next-action / milestone honesty. There is no component test suite.
 
 ## Layout (as built)
 
@@ -53,9 +53,18 @@ src/
     speech.ts             # Web Speech API, lang ko-KR
 ```
 
-Tabs (`types.ts` `Tab`): `home` | `phases` | `hangul` | `watch` | `routine` | `drama` | `milestones` (UI label: Goals).
+Tabs (`types.ts` `Tab`): `today` | `learn` | `log` | `path`.
+
+- **Today**: one computed next action (`decideNextAction` in `src/utils/progressHonesty.ts`)
+- **Learn**: Hangul practice/quiz + Watch (YouTube study only)
+- **Log**: weekly routine + drama phrases
+- **Path**: phases + skill-gated goals
+
+Do not add a fifth primary tab. Watch is a Learn mode, not a peer of Hangul.
 
 Watch is **YouTube study videos only**. Embed via IFrame API (`src/components/YoutubePlayer.tsx`). Progress keys: `videoProgress`, `playlistVideos`, `customWatch` on `AppProgress`. Completing every video in a catalog playlist at 80%+ can auto-check a linked task (`catalog[].taskId`). Do not embed Viki/Netflix or other licensed drama hosts.
+
+Hangul “ready” is last 10+ answers at 80%+ (`hangulStats.recent`), not lifetime correct/total. Goals “you are here” uses `skillMilestoneIndex` (tasks + hangul ready). Fluency is never auto-marked. Phase “Complete” means every task checkbox is still on — not `currentPhaseId`.
 
 Korean copy and Hangul UI are hardcoded (e.g. `Layout` subtitle “Korean · Honest milestones”). Changing language is a product change, not a config flip.
 
