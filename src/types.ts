@@ -59,6 +59,7 @@ export interface Watchable {
   subtitle?: string
   kind: 'video' | 'playlist'
   youtubeId: string
+  startVideoId?: string
   url: string
   taskId?: string
   phaseId?: string

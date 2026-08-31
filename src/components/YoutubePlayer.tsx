@@ -26,7 +26,10 @@ function embedSrc(item: Watchable): string {
   const origin = encodeURIComponent(window.location.origin)
   const common = `enablejsapi=1&rel=0&modestbranding=1&playsinline=1&origin=${origin}`
   if (item.kind === 'playlist') {
-    return `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(item.youtubeId)}&${common}`
+    const start = item.startVideoId
+      ? `${encodeURIComponent(item.startVideoId)}?list=${encodeURIComponent(item.youtubeId)}`
+      : `videoseries?list=${encodeURIComponent(item.youtubeId)}`
+    return `https://www.youtube.com/embed/${start}&${common}`
   }
   return `https://www.youtube.com/embed/${encodeURIComponent(item.youtubeId)}?${common}`
 }
