@@ -45,6 +45,25 @@ export interface WeeklyRoutine {
   dramaNote: string
 }
 
+export interface VideoWatch {
+  seconds: number
+  duration: number
+  completed: boolean
+  title?: string
+  updatedAt: string
+}
+
+export interface Watchable {
+  id: string
+  title: string
+  subtitle?: string
+  kind: 'video' | 'playlist'
+  youtubeId: string
+  url: string
+  taskId?: string
+  phaseId?: string
+}
+
 export interface AppProgress {
   completedTasks: Record<string, boolean>
   currentPhaseId: string
@@ -52,6 +71,9 @@ export interface AppProgress {
   routineChecks: Record<string, boolean>
   startDate: string
   hangulStats: HangulStats
+  videoProgress: Record<string, VideoWatch>
+  playlistVideos: Record<string, string[]>
+  customWatch: Watchable[]
 }
 
 export interface HangulStats {
@@ -60,4 +82,4 @@ export interface HangulStats {
   streak: number
 }
 
-export type Tab = 'home' | 'phases' | 'hangul' | 'routine' | 'drama' | 'milestones'
+export type Tab = 'home' | 'phases' | 'hangul' | 'watch' | 'routine' | 'drama' | 'milestones'

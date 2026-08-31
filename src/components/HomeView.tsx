@@ -9,7 +9,9 @@ interface HomeViewProps {
   phraseCount: number
   routineDone: number
   hangulAccuracy: number
+  watchPercent: number
   onNavigate: (tab: Tab) => void
+  onWatch: () => void
 }
 
 export function HomeView({
@@ -20,7 +22,9 @@ export function HomeView({
   phraseCount,
   routineDone,
   hangulAccuracy,
+  watchPercent,
   onNavigate,
+  onWatch,
 }: HomeViewProps) {
   return (
     <div className="space-y-6">
@@ -46,7 +50,11 @@ export function HomeView({
           value={hangulAccuracy > 0 ? `${hangulAccuracy}%` : '—'}
           onClick={() => onNavigate('hangul')}
         />
-        <StatCard label="Phase progress" value={`${phasePercent}%`} onClick={() => onNavigate('phases')} />
+        <StatCard
+          label="Hangul playlist"
+          value={watchPercent > 0 ? `${watchPercent}%` : '—'}
+          onClick={onWatch}
+        />
       </section>
 
       {currentPhase.number === 1 && (
@@ -60,6 +68,12 @@ export function HomeView({
             className="w-full py-3 bg-coral text-white rounded-xl font-semibold text-sm hover:bg-coral/90 transition-colors"
           >
             Practice Hangul →
+          </button>
+          <button
+            onClick={onWatch}
+            className="w-full py-3 border border-cream-dark rounded-xl font-semibold text-sm hover:bg-cream transition-colors"
+          >
+            Watch Hangul playlist →
           </button>
         </section>
       )}

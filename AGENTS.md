@@ -44,6 +44,7 @@ src/
   data/
     curriculum.ts         # Korean phases, milestones, weekly routine keys
     hangul.ts             # consonants, vowels, syllables for chart + quiz
+    videos.ts             # YouTube catalog (Hangul playlist)
   hooks/
     useProgress.ts        # load/save localStorage; all mutations
   components/             # one view per tab + Layout, InstallPrompt, ProgressRing
@@ -52,7 +53,9 @@ src/
     speech.ts             # Web Speech API, lang ko-KR
 ```
 
-Tabs (`types.ts` `Tab`): `home` | `phases` | `hangul` | `routine` | `drama` | `milestones` (UI label: Goals).
+Tabs (`types.ts` `Tab`): `home` | `phases` | `hangul` | `watch` | `routine` | `drama` | `milestones` (UI label: Goals).
+
+Watch is **YouTube study videos only**. Embed via IFrame API (`src/components/YoutubePlayer.tsx`). Progress keys: `videoProgress`, `playlistVideos`, `customWatch` on `AppProgress`. Completing every video in a catalog playlist at 80%+ can auto-check a linked task (`catalog[].taskId`). Do not embed Viki/Netflix or other licensed drama hosts.
 
 Korean copy and Hangul UI are hardcoded (e.g. `Layout` subtitle “Korean · Honest milestones”). Changing language is a product change, not a config flip.
 

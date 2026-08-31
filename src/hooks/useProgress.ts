@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { AppProgress, DramaPhrase } from '../types'
+import type { AppProgress, DramaPhrase, VideoWatch, Watchable } from '../types'
+import { catalog } from '../data/videos'
 import { phases } from '../data/curriculum'
+import { isWatchComplete, playlistWatchSummary } from '../utils/youtube'
 
 const STORAGE_KEY = 'waypoint-progress'
 const LEGACY_STORAGE_KEY = 'korean-path-progress'
@@ -12,6 +14,9 @@ const defaultProgress = (): AppProgress => ({
   routineChecks: {},
   startDate: new Date().toISOString(),
   hangulStats: { correct: 0, total: 0, streak: 0 },
+  videoProgress: {},
+  playlistVideos: {},
+  customWatch: [],
 })
 
 function loadProgress(): AppProgress {
@@ -23,7 +28,14 @@ function loadProgress(): AppProgress {
     }
     if (raw) {
       const parsed = JSON.parse(raw)
-      return { ...defaultProgress(), ...parsed, hangulStats: { ...defaultProgress().hangulStats, ...parsed.hangulStats } }
+      return {
+        ...defaultProgress(),
+        ...parsed,
+        hangulStats: { ...defaultProgress().hangulStats, ...parsed.hangulStats },
+        videoProgress: parsed.videoProgress ?? {},
+        playlistVideos: parsed.playlistVideos ?? {},
+        customWatch: parsed.customWatch ?? [],
+      }
     }
   } catch {
     /* ignore corrupt data */
@@ -47,15 +59,7 @@ export function useProgress() {
       const completed = { ...prev.completedTasks, [taskId]: !prev.completedTasks[taskId] }
       const updated = { ...prev, completedTasks: completed }
 
-      for (const phase of phases) {
-        const allDone = phase.tasks.every((t) => completed[t.id])
-        if (allDone && phase.id === prev.currentPhaseId) {
-          const nextIndex = phases.findIndex((p) => p.id === phase.id) + 1
-          if (nextIndex < phases.length) {
-            updated.currentPhaseId = phases[nextIndex].id
-          }
-        }
-      }
+      maybeAdvancePhase(updated, completed, prev.currentPhaseId)
 
       return updated
     })
@@ -95,6 +99,47 @@ export function useProgress() {
 
   const resetAll = useCallback(() => {
     setProgress(defaultProgress())
+  }, [])
+
+  const recordVideoProgress = useCallback((videoId: string, patch: Omit<VideoWatch, 'updatedAt'>) => {
+    setProgress((prev) => {
+      const prevVid = prev.videoProgress[videoId]
+      const completed = patch.completed || isWatchComplete(patch.seconds, patch.duration)
+      const nextVid: VideoWatch = {
+        seconds: patch.seconds,
+        duration: patch.duration,
+        completed,
+        title: patch.title ?? prevVid?.title,
+        updatedAt: new Date().toISOString(),
+      }
+      const videoProgress = { ...prev.videoProgress, [videoId]: nextVid }
+      const updated: AppProgress = { ...prev, videoProgress }
+      completeLinkedWatchTasks(updated)
+      return updated
+    })
+  }, [])
+
+  const rememberPlaylist = useCallback((playlistId: string, videoIds: string[]) => {
+    if (videoIds.length === 0) return
+    setProgress((prev) => {
+      const existing = prev.playlistVideos[playlistId]
+      if (existing && existing.length === videoIds.length && existing.every((id, i) => id === videoIds[i])) {
+        return prev
+      }
+      const updated: AppProgress = {
+        ...prev,
+        playlistVideos: { ...prev.playlistVideos, [playlistId]: videoIds },
+      }
+      completeLinkedWatchTasks(updated)
+      return updated
+    })
+  }, [])
+
+  const addCustomWatch = useCallback((item: Watchable) => {
+    setProgress((prev) => {
+      if (prev.customWatch.some((w) => w.id === item.id)) return prev
+      return { ...prev, customWatch: [...prev.customWatch, item] }
+    })
   }, [])
 
   const recordHangulAnswer = useCallback((correct: boolean) => {
@@ -145,5 +190,37 @@ export function useProgress() {
     daysSinceStart,
     routineDoneThisWeek,
     recordHangulAnswer,
+    recordVideoProgress,
+    rememberPlaylist,
+    addCustomWatch,
+  }
+}
+
+function maybeAdvancePhase(
+  updated: AppProgress,
+  completed: Record<string, boolean>,
+  currentPhaseId: string,
+) {
+  for (const phase of phases) {
+    const allDone = phase.tasks.every((t) => completed[t.id])
+    if (allDone && phase.id === currentPhaseId) {
+      const nextIndex = phases.findIndex((p) => p.id === phase.id) + 1
+      if (nextIndex < phases.length) {
+        updated.currentPhaseId = phases[nextIndex].id
+      }
+    }
+  }
+}
+
+function completeLinkedWatchTasks(updated: AppProgress) {
+  for (const item of catalog) {
+    if (!item.taskId || item.kind !== 'playlist') continue
+    const ids = updated.playlistVideos[item.youtubeId] ?? []
+    if (ids.length === 0) continue
+    const summary = playlistWatchSummary(ids, updated.videoProgress)
+    if (summary.percent < 100) continue
+    if (updated.completedTasks[item.taskId]) continue
+    updated.completedTasks = { ...updated.completedTasks, [item.taskId]: true }
+    maybeAdvancePhase(updated, updated.completedTasks, updated.currentPhaseId)
   }
 }

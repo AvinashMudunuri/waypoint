@@ -1,4 +1,5 @@
 import type { Phase } from '../types'
+import { catalog } from '../data/videos'
 
 interface PhasesViewProps {
   phases: Phase[]
@@ -6,6 +7,7 @@ interface PhasesViewProps {
   completedTasks: Record<string, boolean>
   phaseProgress: (id: string) => number
   onToggleTask: (taskId: string) => void
+  onWatch: (catalogId: string) => void
 }
 
 export function PhasesView({
@@ -14,6 +16,7 @@ export function PhasesView({
   completedTasks,
   phaseProgress,
   onToggleTask,
+  onWatch,
 }: PhasesViewProps) {
   return (
     <div className="space-y-6">
@@ -99,17 +102,32 @@ export function PhasesView({
               <div className="border-t border-cream-dark px-5 py-4">
                 <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">Resources</p>
                 <div className="flex flex-wrap gap-2">
-                  {phase.resources.map((r) => (
-                    <a
-                      key={r.url}
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs px-3 py-1.5 bg-cream rounded-full text-ink hover:bg-coral/10 hover:text-coral transition-colors"
-                    >
-                      {r.name} ↗
-                    </a>
-                  ))}
+                  {phase.resources.map((r) => {
+                    const watchable = catalog.find((v) => v.url === r.url)
+                    if (watchable) {
+                      return (
+                        <button
+                          key={r.url}
+                          type="button"
+                          onClick={() => onWatch(watchable.id)}
+                          className="text-xs px-3 py-1.5 bg-coral text-white rounded-full hover:bg-coral/90 transition-colors"
+                        >
+                          {r.name} · Watch
+                        </button>
+                      )
+                    }
+                    return (
+                      <a
+                        key={r.url}
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs px-3 py-1.5 bg-cream rounded-full text-ink hover:bg-coral/10 hover:text-coral transition-colors"
+                      >
+                        {r.name} ↗
+                      </a>
+                    )
+                  })}
                 </div>
               </div>
             )}
