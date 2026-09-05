@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { phases } from '../data/curriculum.ts'
+import { dePhases } from '../data/curriculum.de.ts'
 import {
   appendHangulRecent,
   currentPhaseFromTasks,
@@ -32,6 +33,12 @@ test('current phase retreats to the first incomplete phase', () => {
   assert.equal(currentPhaseFromTasks(hangulDone), 'foundation')
   const almost = { ...hangulDone, h1: false }
   assert.equal(currentPhaseFromTasks(almost), 'hangul')
+})
+
+test('German path uses sounds as first phase', () => {
+  assert.equal(currentPhaseFromTasks({}, dePhases), 'sounds')
+  const soundsDone = Object.fromEntries(dePhases[0].tasks.map((t) => [t.id, true]))
+  assert.equal(currentPhaseFromTasks(soundsDone, dePhases), 'foundation')
 })
 
 test('phase complete is all checkboxes, not phase id', () => {

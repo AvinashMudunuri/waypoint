@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { milestones, phases } from './data/curriculum'
 import { InstallPrompt } from './components/InstallPrompt'
 import { HomeView } from './components/HomeView'
+import { LanguageSelect } from './components/LanguageSelect'
 import { Layout } from './components/Layout'
 import { LearnView } from './components/LearnView'
 import { LogView } from './components/LogView'
 import { PathView } from './components/PathView'
 import { useProgress } from './hooks/useProgress'
+import { loadLanguage, packs, saveLanguage, type LanguageCode } from './data/pack'
 import {
   decideNextAction,
-  hangulPlaylistPercent,
+  featuredPlaylistPercent,
   hangulRecentStats,
   skillMilestoneIndex,
   type LearnMode,
@@ -24,6 +25,10 @@ function routeFromLocation(): RouteState {
 }
 
 export default function App() {
+  const [lang, setLang] = useState<LanguageCode | null>(loadLanguage)
+  const [picking, setPicking] = useState(() => loadLanguage() === null || window.location.hash === '#/lang')
+  const pack = packs[lang ?? 'ko']
+
   const [route, setRoute] = useState<RouteState>(routeFromLocation)
   const [watchFocusId, setWatchFocusId] = useState<string | null>(null)
 
@@ -32,17 +37,24 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const onHash = () => applyRoute(routeFromLocation())
+    const onHash = () => {
+      if (window.location.hash === '#/lang') setPicking(true)
+      applyRoute(routeFromLocation())
+    }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [applyRoute])
 
   useEffect(() => {
+    if (picking) {
+      if (window.location.hash !== '#/lang') window.history.replaceState(null, '', '#/lang')
+      return
+    }
     const hash = toHash(route)
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
     }
-  }, [route])
+  }, [route, picking])
 
   const {
     progress,
@@ -60,9 +72,14 @@ export default function App() {
     recordVideoProgress,
     rememberPlaylist,
     addCustomWatch,
-  } = useProgress()
+  } = useProgress(pack)
 
-  const playlist = hangulPlaylistPercent(progress.playlistVideos, progress.videoProgress)
+  const playlist = featuredPlaylistPercent(
+    progress.playlistVideos,
+    progress.videoProgress,
+    pack.featuredWatchId,
+    pack.catalog,
+  )
   const hangul = hangulRecentStats(progress.hangulStats)
   const next = decideNextAction({
     completedTasks: progress.completedTasks,
@@ -71,10 +88,12 @@ export default function App() {
     playlistKnown: playlist.known,
     routineDone: routineDoneThisWeek,
     phraseCount: progress.dramaPhrases.length,
+    pack,
   })
   const milestonesState = skillMilestoneIndex({
     completedTasks: progress.completedTasks,
     hangulReady: hangul.ready,
+    phases: pack.phases,
   })
 
   const go = (
@@ -97,12 +116,20 @@ export default function App() {
       quiz: next.learnMode === 'practice',
       log: next.logMode,
       path: next.pathMode,
-      watchId: next.learnMode === 'watch' ? 'billy-hangul' : undefined,
+      watchId: next.learnMode === 'watch' ? pack.featuredWatchId : undefined,
     })
   }
 
-  const onTabChange = (tab: Tab) => {
-    applyRoute({ ...defaultRoute(), tab })
+  const choose = (code: LanguageCode) => {
+    saveLanguage(code)
+    setLang(code)
+    setPicking(false)
+    applyRoute(defaultRoute())
+    setWatchFocusId(null)
+  }
+
+  if (picking || !lang) {
+    return <LanguageSelect onChoose={choose} />
   }
 
   const renderView = () => {
@@ -121,6 +148,8 @@ export default function App() {
                   : `last ${hangul.sample}: ${hangul.percent}% (need 10 at 80%+)`
             }
             playlistLabel={playlist.known ? `${playlist.percent}%` : 'not started'}
+            quizStatLabel={pack.quizStatLabel}
+            playlistStatLabel={pack.playlistStatLabel}
             next={next}
             onDoNext={doNext}
           />
@@ -128,6 +157,7 @@ export default function App() {
       case 'learn':
         return (
           <LearnView
+            pack={pack}
             mode={route.learnMode}
             onMode={(m) => applyRoute({ ...route, learnMode: m, quiz: false })}
             startQuiz={route.quiz}
@@ -145,6 +175,7 @@ export default function App() {
       case 'log':
         return (
           <LogView
+            pack={pack}
             mode={route.logMode}
             onMode={(m) => applyRoute({ ...route, logMode: m })}
             routineChecks={progress.routineChecks}
@@ -158,15 +189,16 @@ export default function App() {
       case 'path':
         return (
           <PathView
+            catalog={pack.catalog}
             mode={route.pathMode}
             onMode={(m) => applyRoute({ ...route, pathMode: m })}
-            phases={phases}
+            phases={pack.phases}
             currentPhaseId={progress.currentPhaseId}
             completedTasks={progress.completedTasks}
             phaseProgress={phaseProgress}
             onToggleTask={toggleTask}
             onWatch={(id) => go('learn', { learn: 'watch', watchId: id })}
-            milestones={milestones}
+            milestones={pack.milestones}
             daysSinceStart={daysSinceStart}
             overallPercent={overallProgress}
             reached={milestonesState.reached}
@@ -177,7 +209,12 @@ export default function App() {
   }
 
   return (
-    <Layout activeTab={route.tab} onTabChange={onTabChange}>
+    <Layout
+      activeTab={route.tab}
+      onTabChange={(tab) => applyRoute({ ...defaultRoute(), tab })}
+      subtitle={pack.subtitle}
+      onChangeLanguage={() => setPicking(true)}
+    >
       <InstallPrompt />
       {renderView()}
     </Layout>

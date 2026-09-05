@@ -8,6 +8,8 @@ interface HomeViewProps {
   daysSinceStart: number
   hangulLabel: string
   playlistLabel: string
+  quizStatLabel: string
+  playlistStatLabel: string
   next: NextAction
   onDoNext: () => void
 }
@@ -18,6 +20,8 @@ export function HomeView({
   daysSinceStart,
   hangulLabel,
   playlistLabel,
+  quizStatLabel,
+  playlistStatLabel,
   next,
   onDoNext,
 }: HomeViewProps) {
@@ -34,8 +38,8 @@ export function HomeView({
       <div className="flex items-center gap-4">
         <ProgressRing percent={phasePercent} size={96} label="phase" />
         <div className="text-sm text-ink-muted space-y-1">
-          <p>Hangul quiz: {hangulLabel}</p>
-          <p>Hangul playlist: {playlistLabel}</p>
+          <p>{quizStatLabel}: {hangulLabel}</p>
+          <p>{playlistStatLabel}: {playlistLabel}</p>
         </div>
       </div>
 

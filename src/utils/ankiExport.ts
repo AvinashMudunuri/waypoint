@@ -1,4 +1,5 @@
 import type { DramaPhrase } from '../types'
+import type { LanguagePack } from '../data/pack'
 
 function escapeHtml(text: string): string {
   return text
@@ -19,13 +20,15 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 }
 
 /** Anki-compatible tab-separated import file */
-export function exportPhrasesToAnki(phrases: DramaPhrase[]) {
+export function exportPhrasesToAnki(phrases: DramaPhrase[], pack?: LanguagePack) {
   if (phrases.length === 0) return
+  const deck = pack?.ankiDeck ?? 'Waypoint Korean Phrases'
+  const slug = pack?.code === 'de' ? 'german' : 'korean'
 
   const lines = [
     '#separator:tab',
     '#html:true',
-    '#deck:Waypoint Korean Phrases',
+    `#deck:${deck}`,
     '#notetype:Basic',
     '#columns:Front Back Tags',
     '',
@@ -39,21 +42,23 @@ export function exportPhrasesToAnki(phrases: DramaPhrase[]) {
   ]
 
   const date = new Date().toISOString().slice(0, 10)
-  downloadFile(lines.join('\n'), `waypoint-korean-phrases-${date}.txt`, 'text/plain;charset=utf-8')
+  downloadFile(lines.join('\n'), `waypoint-${slug}-phrases-${date}.txt`, 'text/plain;charset=utf-8')
 }
 
 /** Simple CSV for spreadsheets or other flashcard apps */
-export function exportPhrasesToCsv(phrases: DramaPhrase[]) {
+export function exportPhrasesToCsv(phrases: DramaPhrase[], pack?: LanguagePack) {
   if (phrases.length === 0) return
+  const slug = pack?.code === 'de' ? 'german' : 'korean'
+  const front = pack?.code === 'de' ? 'German' : 'Korean'
 
   const escapeCsv = (val: string) => `"${val.replace(/"/g, '""')}"`
   const lines = [
-    'Korean,English,Show,Notes',
+    `${front},English,Show,Notes`,
     ...phrases.map((p) =>
       [p.korean, p.english, p.show, p.notes ?? ''].map(escapeCsv).join(','),
     ),
   ]
 
   const date = new Date().toISOString().slice(0, 10)
-  downloadFile(lines.join('\n'), `waypoint-korean-phrases-${date}.csv`, 'text/csv;charset=utf-8')
+  downloadFile(lines.join('\n'), `waypoint-${slug}-phrases-${date}.csv`, 'text/csv;charset=utf-8')
 }
