@@ -65,7 +65,7 @@ export const packs: Record<LanguageCode, LanguagePack> = {
   de: {
     code: 'de',
     name: 'German',
-    subtitle: 'German · Pilot path',
+    subtitle: 'German · Honest milestones',
     scriptLabel: 'Sounds',
     watchLabel: 'Watch',
     quizStatLabel: 'Sounds quiz',

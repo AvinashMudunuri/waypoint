@@ -31,10 +31,10 @@ export function LanguageSelect({ onChoose }: LanguageSelectProps) {
             onClick={() => onChoose('de')}
             className="w-full text-left rounded-2xl border border-cream-dark bg-white p-5 hover:bg-cream transition-colors"
           >
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pilot</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-coral">Live</p>
             <p className="font-display text-2xl font-bold mt-1">{packs.de.name}</p>
             <p className="text-sm text-ink-muted mt-1">
-              Sounds, Easy German, media phrases. Same honesty rules. Thinner than Korean on purpose.
+              Four phases: sounds, Nico’s Weg + Anki, media immersion, real conversation. Same honesty rules.
             </p>
           </button>
         </div>

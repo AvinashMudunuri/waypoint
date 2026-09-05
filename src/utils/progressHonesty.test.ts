@@ -41,6 +41,14 @@ test('German path uses sounds as first phase', () => {
   assert.equal(currentPhaseFromTasks(soundsDone, dePhases), 'foundation')
 })
 
+test('German curriculum matches Korean phase and task count', () => {
+  assert.equal(dePhases.length, phases.length)
+  const koTasks = phases.reduce((n, p) => n + p.tasks.length, 0)
+  const deTasks = dePhases.reduce((n, p) => n + p.tasks.length, 0)
+  assert.equal(deTasks, koTasks)
+  assert.ok(dePhases.every((p) => p.tasks.length >= 5 && p.exitCriteria.length > 0))
+})
+
 test('phase complete is all checkboxes, not phase id', () => {
   const hangul = phases[0]
   assert.equal(phaseTasksComplete(hangul, {}), false)

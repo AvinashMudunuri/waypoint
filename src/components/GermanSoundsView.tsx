@@ -79,6 +79,13 @@ export function GermanSoundsView({ stats, onAnswer, startInQuiz = false }: Germa
             Start quiz
           </button>
         </div>
+        <details className="rounded-xl border border-cream-dark bg-white p-4">
+          <summary className="cursor-pointer text-sm font-medium">How German sounds work</summary>
+          <p className="mt-2 text-sm text-ink-muted">
+            The alphabet is Latin. The work is umlauts, ß, ch/sch, and learning der/die/das with every noun.
+            Articles are not optional extra credit.
+          </p>
+        </details>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {germanSounds.map((s) => (
             <button
