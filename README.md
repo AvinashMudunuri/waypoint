@@ -37,7 +37,7 @@ Open http://localhost:5173
 | Language | Status | Highlights |
 |----------|--------|------------|
 | **Korean** | Live | Hangul quiz, K-drama phrase miner, 4-phase curriculum |
-| **German** | Pilot | Sounds quiz, Easy German watch, media phrases — thinner on purpose |
+| **German** | Live | Sounds quiz, Nico’s Weg path, Easy German watch, media phrases |
 | Japanese | Not started | Do not port until Korean (and the German pilot) show return visits |
 
 ## Features (Korean v0.1)
@@ -66,9 +66,8 @@ In the Drama tab, tap **Export for Anki** to download a `.txt` file. In Anki: Fi
 
 Source of truth for unbuilt work. None of these exist in `src/` today.
 
-- [x] Language selector (`#/lang`) — Korean live, German pilot
-- [ ] Japanese module (only after Korean/German pilot evidence)
-- [ ] Deepen German past the thin path (only if the German tester actually uses it)
+- [x] Language selector (`#/lang`) — Korean and German four-phase paths
+- [ ] Japanese module (only after Korean/German show return visits)
 - [ ] Tutor booking reminders
 - [ ] Cloud sync / accounts
 - [ ] Broader automated tests (only `spokenHangul` mapping is covered today)

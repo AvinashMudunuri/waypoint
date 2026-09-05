@@ -11,4 +11,13 @@ export const deCatalog: Watchable[] = [
     taskId: 's1',
     phaseId: 'sounds',
   },
+  {
+    id: 'easy-german-vlogs',
+    title: 'Easy German — Vlogs & documentaries',
+    subtitle: 'Phase 3 · longer input after A1',
+    kind: 'playlist',
+    youtubeId: 'PLk1fjOl39-50RITUTsTOLTnBoTRlxwroe',
+    url: 'https://www.youtube.com/playlist?list=PLk1fjOl39-50RITUTsTOLTnBoTRlxwroe',
+    phaseId: 'media',
+  },
 ]

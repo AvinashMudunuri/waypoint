@@ -18,6 +18,12 @@ export const germanSounds: GermanSound[] = [
   { char: 'z', romanization: 'ts', hint: 'Zeit starts with ts', speak: 'Zeit' },
   { char: 'w', romanization: 'v', hint: 'Wein sounds like vine', speak: 'Wein' },
   { char: 'v', romanization: 'f (often)', hint: 'Vater ≈ fah-ter', speak: 'Vater' },
+  { char: 'au', romanization: 'ow', hint: 'Haus = house', speak: 'Haus' },
+  { char: 'st / sp', romanization: 'sht / shp', hint: 'At the start of a word: Straße, spielen', speak: 'Straße' },
+  { char: 'ig', romanization: 'ich (end)', hint: 'fertig often ends like -ich', speak: 'fertig' },
+  { char: 'pf', romanization: 'pf', hint: 'One puff: Pferd, Apfel', speak: 'Apfel' },
+  { char: 'r', romanization: 'uvular r', hint: 'Back of the throat, or a light tap — both are used', speak: 'rot' },
+  { char: 'der / die / das', romanization: 'gender', hint: 'Learn the article with the noun. Always.', speak: 'der Tisch' },
 ]
 
 export function pickRandom<T>(list: T[], n: number, exclude: T): T[] {

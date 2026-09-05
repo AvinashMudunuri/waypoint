@@ -66,7 +66,7 @@ Watch is **YouTube study videos only**. Embed via IFrame API (`src/components/Yo
 
 Hangul “ready” is last 10+ answers at 80%+ (`hangulStats.recent`), not lifetime correct/total. Goals “you are here” uses `skillMilestoneIndex` (tasks + hangul ready). Fluency is never auto-marked. Phase “Complete” means every task checkbox is still on — not `currentPhaseId`. `currentPhaseId` is always the first incomplete phase (`currentPhaseFromTasks`); unchecking an earlier task retreats it.
 
-First visit and `#/lang` show a language selector (`LanguageSelect`). **Korean is the full product.** **German is a thin pilot** (sounds quiz, Easy German playlist, media phrases) for a two-user test — not a second platform. Packs live in `src/data/pack.ts` (`ko` / `de`). Do not add Japanese or a generic `src/languages/` tree from this. Header **Language** returns to the selector. Progress keys: `waypoint-progress` (Korean, plus legacy `korean-path-progress`) and `waypoint-progress-de`.
+First visit and `#/lang` show a language selector (`LanguageSelect`). Korean and German are both full four-phase paths. Packs live in `src/data/pack.ts`. Korean content: `curriculum.ts`, `hangul.ts`, `videos.ts`. German content: `curriculum.de.ts`, `germanSounds.ts`, `videos.de.ts`. Do not add Japanese or a generic `src/languages/` tree from this. Header **Language** returns to the selector. Progress keys: `waypoint-progress` (Korean, plus legacy `korean-path-progress`) and `waypoint-progress-de`.
 
 ## Persistence
 
