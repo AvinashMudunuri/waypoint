@@ -38,7 +38,7 @@ Open http://localhost:5173
 |----------|--------|------------|
 | **Korean** | Live | Hangul quiz, K-drama phrase miner, 4-phase curriculum |
 | **German** | Live | Sounds quiz, Nico’s Weg path, Easy German watch, media phrases |
-| Japanese | Not started | Do not port until Korean (and the German pilot) show return visits |
+| Japanese | Not started | Do not port until Korean and German show return visits |
 
 ## Features (Korean v0.1)
 
