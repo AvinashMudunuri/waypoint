@@ -1,5 +1,7 @@
 import type { HangulStats, VideoWatch, Watchable } from '../types'
+import type { LanguagePack } from '../data/pack'
 import type { LearnMode } from '../utils/progressHonesty'
+import { GermanSoundsView } from './GermanSoundsView'
 import { HangulView } from './HangulView'
 import { Segmented } from './Segmented'
 import { WatchView } from './WatchView'
@@ -17,6 +19,7 @@ interface LearnViewProps {
   onProgress: (videoId: string, patch: Omit<VideoWatch, 'updatedAt'>) => void
   onPlaylistIds: (playlistId: string, videoIds: string[]) => void
   onAddCustom: (item: Watchable) => void
+  pack: LanguagePack
 }
 
 export function LearnView({
@@ -32,6 +35,7 @@ export function LearnView({
   onProgress,
   onPlaylistIds,
   onAddCustom,
+  pack,
 }: LearnViewProps) {
   return (
     <div className="space-y-5">
@@ -40,13 +44,14 @@ export function LearnView({
         value={mode}
         onChange={onMode}
         options={[
-          { id: 'practice', label: 'Hangul' },
-          { id: 'watch', label: 'Watch' },
+          { id: 'practice', label: pack.scriptLabel },
+          { id: 'watch', label: pack.watchLabel },
         ]}
       />
       {mode === 'watch' ? (
         <WatchView
-          key={watchFocusId ?? 'watch'}
+          key={`${pack.code}-${watchFocusId ?? 'watch'}`}
+          catalog={pack.catalog}
           videoProgress={videoProgress}
           playlistVideos={playlistVideos}
           customWatch={customWatch}
@@ -54,6 +59,13 @@ export function LearnView({
           onProgress={onProgress}
           onPlaylistIds={onPlaylistIds}
           onAddCustom={onAddCustom}
+        />
+      ) : pack.code === 'de' ? (
+        <GermanSoundsView
+          key={startQuiz ? 'quiz' : 'chart'}
+          stats={hangulStats}
+          onAnswer={onHangulAnswer}
+          startInQuiz={startQuiz}
         />
       ) : (
         <HangulView

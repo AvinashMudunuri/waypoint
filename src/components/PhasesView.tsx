@@ -1,5 +1,4 @@
-import type { Phase } from '../types'
-import { catalog } from '../data/videos'
+import type { Phase, Watchable } from '../types'
 import { phaseTasksComplete } from '../utils/progressHonesty'
 
 interface PhasesViewProps {
@@ -9,6 +8,7 @@ interface PhasesViewProps {
   phaseProgress: (id: string) => number
   onToggleTask: (taskId: string) => void
   onWatch: (catalogId: string) => void
+  catalog: Watchable[]
 }
 
 export function PhasesView({
@@ -18,6 +18,7 @@ export function PhasesView({
   phaseProgress,
   onToggleTask,
   onWatch,
+  catalog,
 }: PhasesViewProps) {
   return (
     <div className="space-y-6">

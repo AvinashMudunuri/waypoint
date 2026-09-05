@@ -1,13 +1,14 @@
-import { routineDayKeys, routineDayLabels } from '../data/curriculum'
+import { routineDayKeys } from '../data/curriculum'
 
 interface RoutineViewProps {
   routineChecks: Record<string, boolean>
   onToggle: (key: string) => void
   onResetWeek: () => void
   onOpenPhrases?: () => void
+  routineLabels: Record<string, { day: string; activity: string }>
 }
 
-export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrases }: RoutineViewProps) {
+export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrases, routineLabels }: RoutineViewProps) {
   const doneCount = routineDayKeys.filter((k) => routineChecks[k]).length
 
   return (
@@ -30,7 +31,7 @@ export function RoutineView({ routineChecks, onToggle, onResetWeek, onOpenPhrase
 
         <div className="space-y-2">
           {routineDayKeys.map((key) => {
-            const { day, activity } = routineDayLabels[key]
+            const { day, activity } = routineLabels[key]
             const done = routineChecks[key]
             const isSpeaking = key.includes('speak')
             const isDrama = key.includes('drama')

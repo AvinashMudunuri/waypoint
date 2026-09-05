@@ -1,10 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { catalog } from '../data/videos'
 import type { VideoWatch, Watchable } from '../types'
 import { YoutubePlayer } from './YoutubePlayer'
 import { formatClock, parseYoutubeUrl, playlistWatchSummary, watchPercent } from '../utils/youtube'
 
 interface WatchViewProps {
+  catalog: Watchable[]
   videoProgress: Record<string, VideoWatch>
   playlistVideos: Record<string, string[]>
   customWatch: Watchable[]
@@ -15,6 +15,7 @@ interface WatchViewProps {
 }
 
 export function WatchView({
+  catalog,
   videoProgress,
   playlistVideos,
   customWatch,
@@ -23,7 +24,7 @@ export function WatchView({
   onPlaylistIds,
   onAddCustom,
 }: WatchViewProps) {
-  const items = useMemo(() => [...catalog, ...customWatch], [customWatch])
+  const items = useMemo(() => [...catalog, ...customWatch], [catalog, customWatch])
   const [pickedId, setPickedId] = useState<string | null>(null)
   const [paste, setPaste] = useState('')
   const [pasteError, setPasteError] = useState('')

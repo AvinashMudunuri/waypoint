@@ -1,4 +1,4 @@
-import type { Milestone, Phase } from '../types'
+import type { Milestone, Phase, Watchable } from '../types'
 import type { PathMode } from '../utils/progressHonesty'
 import { MilestonesView } from './MilestonesView'
 import { PhasesView } from './PhasesView'
@@ -18,6 +18,7 @@ interface PathViewProps {
   overallPercent: number
   reached: boolean[]
   currentMilestone: number
+  catalog: Watchable[]
 }
 
 export function PathView({
@@ -34,6 +35,7 @@ export function PathView({
   overallPercent,
   reached,
   currentMilestone,
+  catalog,
 }: PathViewProps) {
   return (
     <div className="space-y-5">
@@ -62,6 +64,7 @@ export function PathView({
           phaseProgress={phaseProgress}
           onToggleTask={onToggleTask}
           onWatch={onWatch}
+          catalog={catalog}
         />
       )}
     </div>

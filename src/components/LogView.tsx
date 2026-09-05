@@ -1,4 +1,5 @@
 import type { DramaPhrase } from '../types'
+import type { LanguagePack } from '../data/pack'
 import type { LogMode } from '../utils/progressHonesty'
 import { DramaView } from './DramaView'
 import { RoutineView } from './RoutineView'
@@ -13,6 +14,7 @@ interface LogViewProps {
   phrases: DramaPhrase[]
   onAddPhrase: (phrase: Omit<DramaPhrase, 'id' | 'createdAt'>) => void
   onRemovePhrase: (id: string) => void
+  pack: LanguagePack
 }
 
 export function LogView({
@@ -24,6 +26,7 @@ export function LogView({
   phrases,
   onAddPhrase,
   onRemovePhrase,
+  pack,
 }: LogViewProps) {
   return (
     <div className="space-y-5">
@@ -37,13 +40,14 @@ export function LogView({
         ]}
       />
       {mode === 'phrases' ? (
-        <DramaView phrases={phrases} onAdd={onAddPhrase} onRemove={onRemovePhrase} />
+        <DramaView phrases={phrases} onAdd={onAddPhrase} onRemove={onRemovePhrase} pack={pack} />
       ) : (
         <RoutineView
           routineChecks={routineChecks}
           onToggle={onToggleRoutine}
           onResetWeek={onResetWeek}
           onOpenPhrases={() => onMode('phrases')}
+          routineLabels={pack.routineLabels}
         />
       )}
     </div>

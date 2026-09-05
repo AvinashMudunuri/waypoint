@@ -14,15 +14,16 @@ export function warmSpeechVoices(): void {
   })
 }
 
-function koreanVoice(): SpeechSynthesisVoice | undefined {
+function voiceFor(lang: string): SpeechSynthesisVoice | undefined {
+  const prefix = lang.slice(0, 2).toLowerCase()
   return window.speechSynthesis
     .getVoices()
-    .find((v) => v.lang.toLowerCase().startsWith('ko'))
+    .find((v) => v.lang.toLowerCase().startsWith(prefix))
 }
 
 export function speakKorean(
   text: string,
-  handlers?: { onStart?: () => void; onEnd?: () => void },
+  handlers?: { onStart?: () => void; onEnd?: () => void; lang?: string },
 ): void {
   const trimmed = text.trim()
   if (!trimmed || !isSpeechAvailable()) {
@@ -30,11 +31,12 @@ export function speakKorean(
     return
   }
 
+  const lang = handlers?.lang ?? 'ko-KR'
   window.speechSynthesis.cancel()
   currentUtterance = new SpeechSynthesisUtterance(trimmed)
-  currentUtterance.lang = 'ko-KR'
+  currentUtterance.lang = lang
   currentUtterance.rate = 0.85
-  const voice = koreanVoice()
+  const voice = voiceFor(lang)
   if (voice) currentUtterance.voice = voice
 
   currentUtterance.onstart = () => handlers?.onStart?.()

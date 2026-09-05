@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import type { DramaPhrase } from '../types'
+import type { LanguagePack } from '../data/pack'
 import { SpeakButton } from './SpeakButton'
 import { exportPhrasesToAnki, exportPhrasesToCsv } from '../utils/ankiExport'
 import { isSpeechAvailable, warmSpeechVoices } from '../utils/speech'
@@ -8,9 +9,10 @@ interface DramaViewProps {
   phrases: DramaPhrase[]
   onAdd: (phrase: Omit<DramaPhrase, 'id' | 'createdAt'>) => void
   onRemove: (id: string) => void
+  pack: LanguagePack
 }
 
-export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
+export function DramaView({ phrases, onAdd, onRemove, pack }: DramaViewProps) {
   const [korean, setKorean] = useState('')
   const [english, setEnglish] = useState('')
   const [show, setShow] = useState('')
@@ -36,8 +38,8 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
   }
 
   const handleExport = (format: 'anki' | 'csv') => {
-    if (format === 'anki') exportPhrasesToAnki(phrases)
-    else exportPhrasesToCsv(phrases)
+    if (format === 'anki') exportPhrasesToAnki(phrases, pack)
+    else exportPhrasesToCsv(phrases, pack)
     setExportMsg(`Exported ${phrases.length} phrase${phrases.length !== 1 ? 's' : ''} as ${format === 'anki' ? 'Anki' : 'CSV'}`)
     setTimeout(() => setExportMsg(''), 3000)
   }
@@ -45,17 +47,15 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold">Drama Phrase Miner</h2>
-        <p className="text-sm text-ink-muted mt-1">
-          Lines you typed. Hear them on this device. Export to Anki when you want.
-        </p>
+        <h2 className="font-display text-2xl font-bold">{pack.phraseTitle}</h2>
+        <p className="text-sm text-ink-muted mt-1">{pack.phraseHint}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-dark p-5 space-y-3">
         <div className="grid grid-cols-1 gap-3">
           <input
             type="text"
-            placeholder="Korean phrase (e.g. 진짜?)"
+            placeholder={pack.phrasePlaceholder}
             value={korean}
             onChange={(e) => setKorean(e.target.value)}
             className="w-full px-4 py-3 bg-cream rounded-xl text-sm border-0 focus:ring-2 focus:ring-coral/30 outline-none"
@@ -73,7 +73,7 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
             <>
               <input
                 type="text"
-                placeholder="Show name (e.g. Crash Landing on You)"
+                placeholder={pack.showPlaceholder}
                 value={show}
                 onChange={(e) => setShow(e.target.value)}
                 className="w-full px-4 py-3 bg-cream rounded-xl text-sm border-0 focus:ring-2 focus:ring-coral/30 outline-none"
@@ -150,6 +150,7 @@ export function DramaView({ phrases, onAdd, onRemove }: DramaViewProps) {
                   {canSpeak && (
                     <SpeakButton
                       text={phrase.korean}
+                      lang={pack.speechLang}
                       label={`Pronounce ${phrase.korean}`}
                       className="w-8 h-8"
                       playing={playingId === phrase.id}

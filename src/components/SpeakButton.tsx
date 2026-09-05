@@ -6,9 +6,10 @@ interface SpeakButtonProps {
   className?: string
   playing?: boolean
   onPlaying?: (playing: boolean) => void
+  lang?: string
 }
 
-export function SpeakButton({ text, label, className = '', playing = false, onPlaying }: SpeakButtonProps) {
+export function SpeakButton({ text, label, className = '', playing = false, onPlaying, lang }: SpeakButtonProps) {
   return (
     <button
       type="button"
@@ -16,6 +17,7 @@ export function SpeakButton({ text, label, className = '', playing = false, onPl
         e.stopPropagation()
         onPlaying?.(true)
         speakKorean(text, {
+          lang,
           onStart: () => onPlaying?.(true),
           onEnd: () => onPlaying?.(false),
         })

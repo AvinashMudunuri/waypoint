@@ -5,6 +5,8 @@ interface LayoutProps {
   children: ReactNode
   activeTab: Tab
   onTabChange: (tab: Tab) => void
+  subtitle: string
+  onChangeLanguage: () => void
 }
 
 function IconToday() {
@@ -67,7 +69,7 @@ const tabs: { id: Tab; label: string; icon: typeof IconToday }[] = [
   { id: 'path', label: 'Path', icon: IconPath },
 ]
 
-export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
+export function Layout({ children, activeTab, onTabChange, subtitle, onChangeLanguage }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-cream-dark bg-white/80 backdrop-blur-sm sticky top-0 z-10">
@@ -76,8 +78,15 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
             <h1 className="font-display text-xl font-bold text-ink tracking-tight">
               Waypoint
             </h1>
-            <p className="text-xs text-ink-muted">Korean · Honest milestones</p>
+            <p className="text-xs text-ink-muted">{subtitle}</p>
           </div>
+          <button
+            type="button"
+            onClick={onChangeLanguage}
+            className="text-xs font-semibold text-ink-muted hover:text-coral"
+          >
+            Language
+          </button>
         </div>
       </header>
 
