@@ -46,13 +46,9 @@ export function HomeView({
           <p className="text-sm text-ink-muted">
             Day {daysSinceStart + 1} · {pack.scriptLabel}
           </p>
-          <h2 className="font-display text-3xl font-bold text-ink">
-            {session.closed ? 'Stop here' : 'A short session'}
-          </h2>
+          <h2 className="font-display text-3xl font-bold text-ink">A short session</h2>
           <p className="text-sm text-ink-muted">
-            {session.closed
-              ? 'Leave the rest for tomorrow so you have a reason to come back.'
-              : 'Hear it, answer five, stop. The long playlist is not day one.'}
+            Hear it, answer five, stop. The long playlist is not day one.
           </p>
         </section>
 
