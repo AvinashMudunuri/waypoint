@@ -7,6 +7,82 @@ import { playlistWatchSummary } from './youtube.ts'
 export const HANGUL_RECENT_WINDOW = 20
 export const HANGUL_READY_SAMPLE = 10
 export const HANGUL_READY_PERCENT = 80
+export const SESSION_SIZE = 5
+
+export function localDateKey(now = new Date()): string {
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+export interface SessionSnapshot {
+  date: string
+  answers: number
+  closed: boolean
+}
+
+export function resolveSession(
+  stored: { sessionDate?: string; sessionAnswers?: number; sessionClosed?: boolean },
+  now = new Date(),
+): SessionSnapshot {
+  const today = localDateKey(now)
+  if (!stored.sessionDate || stored.sessionDate !== today) {
+    return { date: today, answers: 0, closed: false }
+  }
+  const answers = stored.sessionAnswers ?? 0
+  return {
+    date: today,
+    answers,
+    closed: Boolean(stored.sessionClosed) || answers >= SESSION_SIZE,
+  }
+}
+
+export function leftoverToReady(recent: boolean[]): {
+  remainingAnswers: number
+  holdPercent: boolean
+  sample: number
+  percent: number
+  ready: boolean
+} {
+  const stats = hangulRecentStats(recent)
+  if (stats.ready) {
+    return {
+      remainingAnswers: 0,
+      holdPercent: false,
+      sample: stats.sample,
+      percent: stats.percent,
+      ready: true,
+    }
+  }
+  if (stats.sample < HANGUL_READY_SAMPLE) {
+    return {
+      remainingAnswers: HANGUL_READY_SAMPLE - stats.sample,
+      holdPercent: false,
+      sample: stats.sample,
+      percent: stats.percent,
+      ready: false,
+    }
+  }
+  return {
+    remainingAnswers: 0,
+    holdPercent: true,
+    sample: stats.sample,
+    percent: stats.percent,
+    ready: false,
+  }
+}
+
+export function leftoverCopy(recent: boolean[], scriptLabel: string): string {
+  const left = leftoverToReady(recent)
+  if (left.ready) {
+    return `${scriptLabel} already counts. Watch or mine a line if you have more time.`
+  }
+  if (left.holdPercent) {
+    return `Last ${left.sample}: ${left.percent}%. Hold ${HANGUL_READY_PERCENT}%+ on the last ${HANGUL_READY_SAMPLE} before ${scriptLabel} counts. Leftover work — not a badge.`
+  }
+  return `${scriptLabel} counts after ${HANGUL_READY_SAMPLE} recent answers at ${HANGUL_READY_PERCENT}%+. ${left.remainingAnswers} left. That is why you open this tomorrow.`
+}
 
 export type LearnMode = 'practice' | 'watch'
 export type LogMode = 'routine' | 'phrases'
@@ -117,6 +193,7 @@ export function decideNextAction(input: {
   routineDone: number
   phraseCount: number
   pack?: LanguagePack
+  sessionClosed?: boolean
 }): NextAction {
   const hangul = hangulRecentStats(input.hangulRecent)
   const playlistDone = input.playlistKnown && input.playlistPercent >= 100
@@ -124,6 +201,30 @@ export function decideNextAction(input: {
   const watchPhaseId = input.pack?.watchPhaseId ?? 'hangul'
   const phraseTaskId = input.pack?.phraseTaskId ?? 'd2'
   const first = firstIncompleteTask(input.completedTasks, phaseList)
+  const script = input.pack?.scriptLabel ?? 'Hangul'
+  const sessionClosed = input.sessionClosed ?? false
+
+  if (first?.phase.id === watchPhaseId && !hangul.ready) {
+    if (sessionClosed) {
+      return {
+        tab: 'learn',
+        learnMode: 'watch',
+        title: 'Come back tomorrow for the rest',
+        detail: leftoverCopy(input.hangulRecent, script),
+        cta: input.pack?.code === 'de' ? 'Watch Easy German if you have time' : 'Watch Hangul if you have time',
+      }
+    }
+    return {
+      tab: 'learn',
+      learnMode: 'practice',
+      title: `Hear ${script}, then five questions`,
+      detail:
+        hangul.sample === 0
+          ? `Today is five answers — not a playlist. ${script} starts to count after ${HANGUL_READY_SAMPLE} at ${HANGUL_READY_PERCENT}%+.`
+          : leftoverCopy(input.hangulRecent, script),
+      cta: "Start today's five",
+    }
+  }
 
   if (first?.phase.id === watchPhaseId && !playlistDone) {
     return {
@@ -136,23 +237,6 @@ export function decideNextAction(input: {
           ? 'Phase 1 starts with Easy German on the street. Play it here so progress counts.'
           : 'Phase 1 starts with Billy Korean’s Hangul series. Play it in the app so progress counts.',
       cta: 'Open player',
-    }
-  }
-
-  if (first?.phase.id === watchPhaseId && !hangul.ready) {
-    const need = Math.max(0, HANGUL_READY_SAMPLE - hangul.sample)
-    const script = input.pack?.scriptLabel ?? 'Hangul'
-    return {
-      tab: 'learn',
-      learnMode: 'practice',
-      title: `Quiz ${script} until it sticks`,
-      detail:
-        hangul.sample === 0
-          ? `Need ${HANGUL_READY_SAMPLE} recent answers at ${HANGUL_READY_PERCENT}%+. One lucky tap is not literacy.`
-          : need > 0
-            ? `Last ${hangul.sample}: ${hangul.percent}%. ${need} more answers before this counts.`
-            : `Last ${hangul.sample}: ${hangul.percent}%. Hold ${HANGUL_READY_PERCENT}%+ on the last ${HANGUL_READY_SAMPLE}.`,
-      cta: 'Start quiz',
     }
   }
 

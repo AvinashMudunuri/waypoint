@@ -28,7 +28,7 @@ src/
 ┌─────────────────────────────────────────┐
 │  Layout — Today · Learn · Log · Path    │
 │  ┌───────────────────────────────────┐  │
-│  │  Today: one next action           │  │
+│  │  Today: session until script ready│  │
 │  │  Learn: Hangul | Watch            │  │
 │  │  Log: Routine | Phrases           │  │
 │  │  Path: Phases | Goals             │  │

@@ -44,7 +44,7 @@ Open http://localhost:5173
 
 | Tab | What it does |
 |-----|-------------|
-| **Today** | One next action from live progress (not a brochure) |
+| **Today** | Hear-then-five session until the script counts; leftover work is the return reason |
 | **Learn** | Hangul chart/quiz + YouTube player with watch % |
 | **Log** | Weekly routine + drama phrase miner / Anki export |
 | **Path** | 4 phases + goals (skill-gated, not calendar) |

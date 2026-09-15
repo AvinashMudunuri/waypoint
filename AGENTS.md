@@ -55,7 +55,7 @@ src/
 
 Tabs (`types.ts` `Tab`): `today` | `learn` | `log` | `path`. Hash routes (`src/utils/hashRoute.ts`): `#/today`, `#/learn`, `#/learn/quiz`, `#/learn/watch`, `#/log`, `#/log/phrases`, `#/path`, `#/path/goals`. Refresh keeps the same screen.
 
-- **Today**: one computed next action (`decideNextAction` in `src/utils/progressHonesty.ts`)
+- **Today**: until Hangul/Sounds “ready”, a hear-then-five session on the home screen; leftover answers are the return hook (not a streak). After ready, one computed next action (`decideNextAction` in `src/utils/progressHonesty.ts`) — quiz before the featured playlist until the script counts.
 - **Learn**: Hangul practice/quiz + Watch (YouTube study only)
 - **Log**: weekly routine + drama phrases
 - **Path**: phases + skill-gated goals
@@ -73,7 +73,7 @@ First visit and `#/lang` show a language selector (`LanguageSelect`). Korean and
 - Key: `waypoint-progress` (Korean) or `waypoint-progress-de` (German)
 - Language choice: `waypoint-language` (`ko` | `de`)
 - Legacy migrate-once: `korean-path-progress` → `waypoint-progress`
-- Shape: `AppProgress` in `types.ts` (completed tasks, current phase, phrases, routine checks, start date, hangul stats)
+- Shape: `AppProgress` in `types.ts` (completed tasks, current phase, phrases, routine checks, start date, hangul stats, sessionDate / sessionAnswers / sessionClosed)
 - `currentPhaseId` is derived from checkboxes (`currentPhaseFromTasks`): first incomplete phase, or the last phase if all are done. Unchecking retreats.
 - Clearing site data wipes progress. There is no export of progress (only phrase Anki/CSV).
 
