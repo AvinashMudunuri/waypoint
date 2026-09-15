@@ -5,6 +5,7 @@ import type { LanguagePack } from '../data/pack.ts'
 import { isSpeechAvailable, speakKorean, warmSpeechVoices } from '../utils/speech.ts'
 import {
   leftoverCopy,
+  leftoverToReady,
   SESSION_SIZE,
   type SessionSnapshot,
 } from '../utils/progressHonesty.ts'
@@ -79,6 +80,7 @@ export function TodaySession({ pack, recent, session, onAnswer, onWatch }: Today
   const [step, setStep] = useState<'hear' | 'quiz'>(startOnQuiz || !canSpeak ? 'quiz' : 'hear')
 
   const leftover = leftoverCopy(recent, pack.scriptLabel)
+  const left = leftoverToReady(recent)
   const heardAll = pack.sessionSeeds.every((s) => heard.includes(s.glyph))
 
   const play = (key: string, text: string) => {
@@ -118,6 +120,11 @@ export function TodaySession({ pack, recent, session, onAnswer, onWatch }: Today
       <section className="bg-white rounded-2xl p-5 border border-coral/25 space-y-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-coral">Today’s five</p>
         <h3 className="font-display text-2xl font-bold">That’s enough for today</h3>
+        {left.remainingAnswers > 0 && (
+          <p className="font-display text-5xl font-bold text-coral leading-none">
+            {left.remainingAnswers} left
+          </p>
+        )}
         <p className="text-sm text-ink-muted">{leftover}</p>
         <p className="text-sm text-ink-muted">
           Not a streak. You stopped on purpose so there is a reason to open this tomorrow.
