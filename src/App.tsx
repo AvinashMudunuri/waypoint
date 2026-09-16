@@ -12,6 +12,7 @@ import {
   decideNextAction,
   featuredPlaylistPercent,
   hangulRecentStats,
+  resolveSession,
   skillMilestoneIndex,
   type LearnMode,
   type LogMode,
@@ -81,6 +82,7 @@ export default function App() {
     pack.catalog,
   )
   const hangul = hangulRecentStats(progress.hangulStats)
+  const session = resolveSession(progress)
   const next = decideNextAction({
     completedTasks: progress.completedTasks,
     hangulRecent: progress.hangulStats.recent ?? [],
@@ -89,6 +91,7 @@ export default function App() {
     routineDone: routineDoneThisWeek,
     phraseCount: progress.dramaPhrases.length,
     pack,
+    sessionClosed: session.closed,
   })
   const milestonesState = skillMilestoneIndex({
     completedTasks: progress.completedTasks,
@@ -137,9 +140,11 @@ export default function App() {
       case 'today':
         return (
           <HomeView
+            pack={pack}
             currentPhase={currentPhase}
             phasePercent={phaseProgress(currentPhase.id)}
             daysSinceStart={daysSinceStart}
+            hangulReady={hangul.ready}
             hangulLabel={
               hangul.sample === 0
                 ? 'not started'
@@ -150,8 +155,12 @@ export default function App() {
             playlistLabel={playlist.known ? `${playlist.percent}%` : 'not started'}
             quizStatLabel={pack.quizStatLabel}
             playlistStatLabel={pack.playlistStatLabel}
+            recent={progress.hangulStats.recent ?? []}
+            session={session}
             next={next}
             onDoNext={doNext}
+            onHangulAnswer={recordHangulAnswer}
+            onWatch={() => go('learn', { learn: 'watch', watchId: pack.featuredWatchId })}
           />
         )
       case 'learn':

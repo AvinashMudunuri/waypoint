@@ -16,6 +16,12 @@ export function progressKey(lang: LanguageCode): string {
   return lang === 'ko' ? 'waypoint-progress' : `waypoint-progress-${lang}`
 }
 
+export interface SessionSeed {
+  glyph: string
+  romanization: string
+  spoken: string
+}
+
 export interface LanguagePack {
   code: LanguageCode
   name: string
@@ -33,6 +39,7 @@ export interface LanguagePack {
   watchPhaseId: string
   phraseTaskId: string
   featuredWatchId: string
+  sessionSeeds: SessionSeed[]
   phases: Phase[]
   milestones: Milestone[]
   catalog: Watchable[]
@@ -57,6 +64,11 @@ export const packs: Record<LanguageCode, LanguagePack> = {
     watchPhaseId: 'hangul',
     phraseTaskId: 'd2',
     featuredWatchId: 'billy-hangul',
+    sessionSeeds: [
+      { glyph: 'ㄱ', romanization: 'g/k', spoken: '그' },
+      { glyph: 'ㅏ', romanization: 'a', spoken: '아' },
+      { glyph: 'ㄴ', romanization: 'n', spoken: '느' },
+    ],
     phases: koPhases,
     milestones: koMilestones,
     catalog: koCatalog,
@@ -79,6 +91,11 @@ export const packs: Record<LanguageCode, LanguagePack> = {
     watchPhaseId: 'sounds',
     phraseTaskId: 'm2',
     featuredWatchId: 'easy-german-phrases',
+    sessionSeeds: [
+      { glyph: 'ä', romanization: 'eh (bare)', spoken: 'Bär' },
+      { glyph: 'ö', romanization: 'er (fur)', spoken: 'schön' },
+      { glyph: 'ü', romanization: 'ue', spoken: 'über' },
+    ],
     phases: dePhases,
     milestones: deMilestones,
     catalog: deCatalog,

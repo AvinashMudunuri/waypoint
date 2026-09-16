@@ -1,30 +1,68 @@
-import type { NextAction } from '../utils/progressHonesty'
+import type { LanguagePack } from '../data/pack'
+import type { NextAction, SessionSnapshot } from '../utils/progressHonesty'
 import type { Phase } from '../types'
 import { ProgressRing } from './ProgressRing'
+import { TodaySession } from './TodaySession'
 
 interface HomeViewProps {
+  pack: LanguagePack
   currentPhase: Phase
   phasePercent: number
   daysSinceStart: number
+  hangulReady: boolean
   hangulLabel: string
   playlistLabel: string
   quizStatLabel: string
   playlistStatLabel: string
+  recent: boolean[]
+  session: SessionSnapshot
   next: NextAction
   onDoNext: () => void
+  onHangulAnswer: (correct: boolean) => void
+  onWatch: () => void
 }
 
 export function HomeView({
+  pack,
   currentPhase,
   phasePercent,
   daysSinceStart,
+  hangulReady,
   hangulLabel,
   playlistLabel,
   quizStatLabel,
   playlistStatLabel,
+  recent,
+  session,
   next,
   onDoNext,
+  onHangulAnswer,
+  onWatch,
 }: HomeViewProps) {
+  if (!hangulReady) {
+    return (
+      <div className="space-y-6">
+        <section className="space-y-1">
+          <p className="text-sm text-ink-muted">
+            Day {daysSinceStart + 1} · {pack.scriptLabel}
+          </p>
+          <h2 className="font-display text-3xl font-bold text-ink">A short session</h2>
+          <p className="text-sm text-ink-muted">
+            Hear it, answer five, stop. The long playlist is not day one.
+          </p>
+        </section>
+
+        <TodaySession
+          pack={pack}
+          recent={recent}
+          session={session}
+          onAnswer={onHangulAnswer}
+          onWatch={onWatch}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <section className="space-y-2">

@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import type { AppProgress, DramaPhrase, VideoWatch, Watchable } from '../types'
 import type { LanguagePack } from '../data/pack'
 import { progressKey } from '../data/pack'
-import { appendHangulRecent, currentPhaseFromTasks } from '../utils/progressHonesty'
+import {
+  appendHangulRecent,
+  currentPhaseFromTasks,
+  resolveSession,
+  SESSION_SIZE,
+} from '../utils/progressHonesty'
 import { isWatchComplete, playlistWatchSummary } from '../utils/youtube'
 
 const LEGACY_STORAGE_KEY = 'korean-path-progress'
@@ -17,6 +22,9 @@ const defaultProgress = (pack: LanguagePack): AppProgress => ({
   videoProgress: {},
   playlistVideos: {},
   customWatch: [],
+  sessionDate: '',
+  sessionAnswers: 0,
+  sessionClosed: false,
 })
 
 function loadProgress(pack: LanguagePack): AppProgress {
@@ -40,6 +48,9 @@ function loadProgress(pack: LanguagePack): AppProgress {
         videoProgress: parsed.videoProgress ?? {},
         playlistVideos: parsed.playlistVideos ?? {},
         customWatch: parsed.customWatch ?? [],
+        sessionDate: parsed.sessionDate ?? '',
+        sessionAnswers: parsed.sessionAnswers ?? 0,
+        sessionClosed: parsed.sessionClosed ?? false,
         currentPhaseId: currentPhaseFromTasks(parsed.completedTasks ?? {}, pack.phases),
       }
     }
@@ -149,6 +160,8 @@ export function useProgress(pack: LanguagePack) {
   const recordHangulAnswer = useCallback((correct: boolean) => {
     setProgress((prev) => {
       const streak = correct ? prev.hangulStats.streak + 1 : 0
+      const session = resolveSession(prev)
+      const answers = session.answers + 1
       return {
         ...prev,
         hangulStats: {
@@ -157,6 +170,9 @@ export function useProgress(pack: LanguagePack) {
           streak,
           recent: appendHangulRecent(prev.hangulStats.recent, correct),
         },
+        sessionDate: session.date,
+        sessionAnswers: answers,
+        sessionClosed: session.closed || answers >= SESSION_SIZE,
       }
     })
   }, [])

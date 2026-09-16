@@ -75,6 +75,10 @@ export interface AppProgress {
   videoProgress: Record<string, VideoWatch>
   playlistVideos: Record<string, string[]>
   customWatch: Watchable[]
+  /** Local calendar day (YYYY-MM-DD) for the current five-question session. */
+  sessionDate: string
+  sessionAnswers: number
+  sessionClosed: boolean
 }
 
 export interface HangulStats {

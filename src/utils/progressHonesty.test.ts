@@ -7,7 +7,12 @@ import {
   currentPhaseFromTasks,
   decideNextAction,
   hangulRecentStats,
+  leftoverCopy,
+  leftoverToReady,
+  localDateKey,
+  resolveSession,
   HANGUL_READY_SAMPLE,
+  SESSION_SIZE,
   phaseTasksComplete,
   skillMilestoneIndex,
 } from './progressHonesty.ts'
@@ -70,8 +75,8 @@ test('milestones are skill-gated; fluency is never auto', () => {
   assert.equal(maxed.current, 4)
 })
 
-test('next action prefers playlist, then quiz, then first task', () => {
-  const watch = decideNextAction({
+test('next action prefers quiz before playlist until the script counts', () => {
+  const firstVisit = decideNextAction({
     completedTasks: {},
     hangulRecent: [],
     playlistPercent: 0,
@@ -79,17 +84,40 @@ test('next action prefers playlist, then quiz, then first task', () => {
     routineDone: 0,
     phraseCount: 0,
   })
-  assert.equal(watch.learnMode, 'watch')
+  assert.equal(firstVisit.learnMode, 'practice')
+  assert.match(firstVisit.title, /Hear Hangul/)
 
-  const quiz = decideNextAction({
+  const stillNotReady = decideNextAction({
     completedTasks: {},
     hangulRecent: [true],
-    playlistPercent: 100,
-    playlistKnown: true,
+    playlistPercent: 0,
+    playlistKnown: false,
     routineDone: 0,
     phraseCount: 0,
   })
-  assert.equal(quiz.learnMode, 'practice')
+  assert.equal(stillNotReady.learnMode, 'practice')
+
+  const afterSession = decideNextAction({
+    completedTasks: {},
+    hangulRecent: Array.from({ length: SESSION_SIZE }, () => true),
+    playlistPercent: 0,
+    playlistKnown: false,
+    routineDone: 0,
+    phraseCount: 0,
+    sessionClosed: true,
+  })
+  assert.equal(afterSession.learnMode, 'watch')
+  assert.match(afterSession.title, /tomorrow/)
+
+  const readyThenWatch = decideNextAction({
+    completedTasks: {},
+    hangulRecent: Array.from({ length: 10 }, () => true),
+    playlistPercent: 0,
+    playlistKnown: false,
+    routineDone: 0,
+    phraseCount: 0,
+  })
+  assert.equal(readyThenWatch.learnMode, 'watch')
 
   const hangulDone = Object.fromEntries(phases[0].tasks.map((t) => [t.id, true]))
   const nextPhase = decideNextAction({
@@ -102,4 +130,25 @@ test('next action prefers playlist, then quiz, then first task', () => {
   })
   assert.equal(nextPhase.tab, 'path')
   assert.equal(nextPhase.pathMode, 'phases')
+})
+
+test('session resets on a new local day and leftover is unfinished work', () => {
+  const today = localDateKey(new Date('2026-09-15T12:00:00'))
+  const same = resolveSession(
+    { sessionDate: today, sessionAnswers: 3, sessionClosed: false },
+    new Date('2026-09-15T18:00:00'),
+  )
+  assert.deepEqual(same, { date: today, answers: 3, closed: false })
+
+  const nextDay = resolveSession(
+    { sessionDate: today, sessionAnswers: 5, sessionClosed: true },
+    new Date('2026-09-16T09:00:00'),
+  )
+  assert.equal(nextDay.answers, 0)
+  assert.equal(nextDay.closed, false)
+
+  const fiveDone = leftoverToReady(Array.from({ length: SESSION_SIZE }, () => true))
+  assert.equal(fiveDone.remainingAnswers, HANGUL_READY_SAMPLE - SESSION_SIZE)
+  assert.equal(fiveDone.ready, false)
+  assert.match(leftoverCopy(Array.from({ length: SESSION_SIZE }, () => true), 'Hangul'), /5 left/)
 })
